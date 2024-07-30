@@ -500,6 +500,8 @@ Tuning the PIDF can be done similarly to tuning a `PIDController`, using the shu
 
 ![telemetry tab + tuning](https://github.com/tomtzook/frc-learn-docs/assets/17641355/ed106ef9-0f07-4d4b-8528-b55add39b722)
 
+Read more about the _Telemetry Tab_ [here](https://docs.revrobotics.com/rev-hardware-client/ion/telemetry)
+
 #### Follower
 
 The _Follower_ mode is quite unique and interesting. It allows a SparkMAX to mimic the output of another SparkMAX. This is incredibly useful when working with a system that has two or motor motors that are supposed to operate in sync. Using this mode, the _follower_ SparkMAX expects CANBus messages from the _master_ SparkMAX which indicate what output the _master_ is using to drive its motor. The _follower_ motor then uses the same output exactly. This also works well with limits. A _master_ may have multiple followers.
