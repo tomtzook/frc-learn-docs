@@ -40,10 +40,23 @@ First, this task requires a compiled code. This is done by first running the _bu
 
 Once the task has the compiled code to deploy, it uses the _ssh_ protocol to stop the old code, then it uploads the new code (along with some dependencies) via the _scp_ protocol, and starts the new code again with _ssh_. Once this process is complete, the new code should be running on the robot. But this can be a long process, so be patient and wait for it to finish completely.
 
+*SHOW IMAGE OF BUILD SUCCESS*
+
 Do note that the process may fail for a variety of reasons. First, the _build_ task may fail due to compliation errors. In that case you should address them and fix your code. Other then that, the upload and commands may fail too.
 
-Deployment failure example
+![deployment failure example](https://github.com/user-attachments/assets/deef6782-fa53-4f50-9b9f-d6d11804484c)
 
-![image](https://github.com/user-attachments/assets/deef6782-fa53-4f50-9b9f-d6d11804484c)
+The `BUILD FAILED` message indicates that there was a failure along the way. For that we know that our code isn't running on the robot. The question that remains is why. Above the `BUILD FAILED` message we will find details of both what the task did and where it failed. To understand the message then, we would have to read and analyze this information. Some typical causes for failure are:
+- The computer not being able to connect to the RoboRIO. This can be caused by serveral things
+  - The computer is not connected to the robot (either over WIFI, Ethernet or USB-B).
+  - The RoboRIO not being on (perhaps the robot is off, the RoboRIO is not connected to a power supply, or there is a fault)
+- The compilation of the code failed.
+  - Either the _build_ task failed to download dependencies (they either don't exist, or the computer is not connected to the internet)
+  - Or the code actually has compilation errors in it (in that case, fix the errors. A list of them will be shown in the output of the task)
+
+The example below shows a failure to connect to the RoboRIO
+
+![discover roborio failure](https://github.com/user-attachments/assets/90a1780a-48cd-454f-93f3-92cc8e54a7a5)
+
 
 ### Deploying with Debugger
