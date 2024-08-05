@@ -34,6 +34,13 @@ This will run the deployment task, which may take a while to run, but you should
 
 ### Understanding the Deployment Task
 
+In FRC Java projects we use the _Gradle Build Tool_. This tool is used to compile and perform tasks with our code. Among those tasks, we have the configured _deploy_ task. This task is meant to upload the compiled code to the robot and run it. After it is complete, the robot will have the new code running. This code will remain on the robot, and post reboot, the robot will start this code again.
+
+First, this task requires a compiled code. This is done by first running the _build_ task, which compiles the code and stores it locally to be used. The _build_ task is rather "smart", meaning that it will only build the code if there were changes to the source code or if no build has occurred. Note that first time build may require internet connection to download dependencies, so for first build you should connect to the internet and run the _build_ task, similar to how you run the _deploy_ task.
+
+Once the task has the compiled code to deploy, it uses the _ssh_ protocol to stop the old code, then it uploads the new code (along with some dependencies) via the _scp_ protocol, and starts the new code again with _ssh_. Once this process is complete, the new code should be running on the robot. But this can be a long process, so be patient and wait for it to finish completely.
+
+Do note that the process may fail for a variety of reasons. First, the _build_ task may fail due to compliation errors. In that case you should address them and fix your code. Other then that, the upload and commands may fail too.
 
 Deployment failure example
 
