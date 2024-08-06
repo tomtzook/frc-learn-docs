@@ -12,7 +12,7 @@ Open the _Terminal_ tab in _Intellij IDEA_
 
 Once open, you can enter commands here. On Windows, enter the following command: 
 ```
-`.\gradlew.bat deploy`
+.\gradlew.bat deploy
 ```
 and press _ENTER_. 
 
@@ -76,7 +76,7 @@ For an FRC code, to allow attaching a debugger, we must deploy the code with the
 
 Open the _Terminal_ tab in _Intellij IDEA_ and run the deployment command with the `-PdebugMode` parameter:
 ```
-`.\gradlew.bat deploy -PdebugMode`
+.\gradlew.bat deploy -PdebugMode
 ```
 (press ENTER to run)
 
@@ -106,4 +106,31 @@ The current configuration should now be the newly created configuration. Make su
 Click on the green _Run_ arrow to run this new configuration. This will run the deployment task but this time it will deploy to the robot with the JVM configured to allow debugger attachment.
 
 ### Attaching Debugger
+
+_Intellij IDEA_ features a great debugger tool, allowing us to debug our code with such ease. With the code on the robot configured to allow attaching a debugger, we can configure _Intellij_ to connect to the code and use the debugger tool.
+
+Open the configuration box and select _Edit Configurations_
+
+![configuration selection](https://github.com/user-attachments/assets/d96fa28e-e779-4c85-9095-8fce2236d86f)
+
+![edit config](https://github.com/user-attachments/assets/9fc1ac93-8152-4028-900c-c2b4bb7311db)
+
+Create a new configuration of type _Remote JVM Debug_
+
+![create new debug config](https://github.com/user-attachments/assets/eab26b29-c3eb-4db6-b95f-f886abc45ff5)
+
+In the newly created configuration:
+- edit the _name_ to something that you can remember and identify easily
+- edit the _hostname_ to the _RoboRIO_ hostname: `roborio-{teamnumber}-frc.local`
+- edit the _port_ to `8349`
+- edit the _use module classpath_ to the first option in the dropdown. Should be the name of your project.
+
+![editing debug config](https://github.com/user-attachments/assets/a986cff0-258a-40e1-b82a-455bb0e2ea53)
+
+Click on _Apply_ and _OK_ to save and exit the configurations dialog.
+The current configuration should now be the newly created configuration. Make sure that it is (should show the name). If it isn't simply click on the box and select the configuration you created.
+
+![configuration](https://github.com/user-attachments/assets/3b089a4a-eb1d-4281-86d0-6a429623c434)
+
+Click on the green bug icon to run the configuration and attach the debugger. For this to work, you must be connected to the robot (view WIFI or Ethernet cable) and the debuggable robot code is running.
 
