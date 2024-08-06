@@ -86,7 +86,7 @@ This will run the deployment task but this time it will deploy to the robot with
 
 To configure the deployment task to deploy with debugger capability, we must create a new run configuration. Click on the configurations selection and click on _Edit Configurations_
 
-![configuration selection](https://github.com/user-attachments/assets/c8482dc9-23ad-4534-b0cb-7972f61198e8)
+![configuration selection](https://github.com/user-attachments/assets/d96fa28e-e779-4c85-9095-8fce2236d86f)
 
 ![edit config](https://github.com/user-attachments/assets/9fc1ac93-8152-4028-900c-c2b4bb7311db)
 
@@ -96,7 +96,7 @@ Create a new configuration of type _Gradle_
 
 Now select this configuration and edit the _name_ (select a recognizable name so you could find it later) and edit the run config to `deploy -PdebugMode` (run deploy task in debug mode)
 
-![edit gradle task config](https://github.com/user-attachments/assets/69b33217-83c9-484b-8c72-47b6fa2d9f71)
+![edit gradle task config](https://github.com/user-attachments/assets/ded4c1b2-8b6a-43f8-8c96-7281418680d0)
 
 Click on _Apply_ and _OK_ to save this new configuration and exit the configurations dialog.
 The current configuration should now be the newly created configuration. Make sure that it is (should show the name). If it isn't simply click on the box and select the configuration you created.
