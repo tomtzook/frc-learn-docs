@@ -66,7 +66,7 @@ The example below shows a failure to connect to the RoboRIO
 ![discover roborio failure](https://github.com/user-attachments/assets/90a1780a-48cd-454f-93f3-92cc8e54a7a5)
 
 
-### Deploying with Debugger
+## Deploying with Debugger
 
 The debugger is quite a useful tool. And generally, any Java process can have a debugger attached to it given the process being run with certain configurations for the JVM to allow a debugger.
 
