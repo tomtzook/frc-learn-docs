@@ -23,18 +23,21 @@ There are 2 derivatives to this design: Brushed and Brushless; Each is a bit dif
 
 ![brushed dc motor](https://github.com/user-attachments/assets/77cd167c-b096-48d4-a659-73d477d20780)
 
+## Controlling DC Motors
+
+## DC Motors Used in FRC
+
 The following are some of the motors currently use in FRC
 
-Name | Image | Manufacturer | Type | Integrated Motor Controller
-------|------|--------------|------|----------
-CIM | ![cim](https://github.com/user-attachments/assets/836f685a-71db-4661-a21b-3ab4dc2597c1) | VEX | Brushed | No
-NEO 1.1 | ![neo 1.1](https://github.com/user-attachments/assets/7dd6e612-4f04-427c-bb1a-5b4422e5ebf7) | REV | Brushless | No
-NEO 500 | ![neo 500](https://github.com/user-attachments/assets/c2d17baa-9d4e-437c-a19c-4e46a7ec6538) | REV | Brushless | No
-Falcon 500 | ![falcon 500](https://github.com/user-attachments/assets/358d1c18-8c02-471c-942a-9a6a5428b047) | VEX/CTRE | Brushless | Yes
-Kraken | ![kraken](https://github.com/user-attachments/assets/489b8de1-4880-417d-9797-7876897e46e4) | VEX/CTRE | Brushless | Yes
+Name | Image | Manufacturer | Type | Motor Controller to Use | Is Motor Controller Integrated?
+------|------|--------------|------|----------|--------
+CIM | ![cim](https://github.com/user-attachments/assets/836f685a-71db-4661-a21b-3ab4dc2597c1) | VEX | Brushed | Any | No
+NEO 1.1 | ![neo 1.1](https://github.com/user-attachments/assets/7dd6e612-4f04-427c-bb1a-5b4422e5ebf7) | REV | Brushless | SparkMax | No
+NEO 500 | ![neo 500](https://github.com/user-attachments/assets/c2d17baa-9d4e-437c-a19c-4e46a7ec6538) | REV | Brushless | SparkMax | No
+NEO Vortex | ![neo vortex](https://github.com/user-attachments/assets/f138cced-2e52-451c-921a-40504765f5c1) | REV | Brushless | SparkMax | No
+Falcon 500 | ![falcon 500](https://github.com/user-attachments/assets/358d1c18-8c02-471c-942a-9a6a5428b047) | VEX/CTRE | Brushless | TalonFX | Yes
+Kraken | ![kraken](https://github.com/user-attachments/assets/489b8de1-4880-417d-9797-7876897e46e4) | VEX/CTRE | Brushless | TalonFX | Yes
 
 As can been seen, FRC made a big move towards brushless motors in recent years. This makes sense, as brushless motors have several advantages over brushed; such as: higher torque, less maintanance requirements and longer lifespan.
-
-## Controlling DC Motors
 
 ## Gears and Gear Box
