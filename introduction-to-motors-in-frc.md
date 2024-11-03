@@ -1,7 +1,7 @@
 Motors provide FRC robots with force and motion. They are the base for designing most systems and are pretty reliable and not to complicated to use.
 
 > [!NOTE]
-> To make it clear, this document does not aim to teach the inner workings of DC motors, but simplify introduce to some of the basic concepts.
+> To make it clear, this document does not aim to teach the inner workings of DC motors, but simply introduce to some of the basic concepts.
 
 ## DC Motors
 
@@ -67,3 +67,23 @@ Kraken | ![kraken](https://github.com/user-attachments/assets/489b8de1-4880-417d
 As can been seen, FRC made a big move towards brushless motors in recent years. This makes sense, as brushless motors have several advantages over brushed; such as: higher torque, less maintanance requirements and longer lifespan.
 
 ### Gears and Gear Box
+
+Transmitions (aka gearboxes) are mechanical devices composed of gears and typically attached to the output shafts of motors. They allow modifiying the direction, speed and torque of the rotational motion of the motor. 
+
+![gearbox](https://github.com/user-attachments/assets/540f55db-8100-4f98-93a6-6daccade52a9)
+
+Consider the set of gears below:
+
+![gear set animation](https://upload.wikimedia.org/wikipedia/commons/b/bd/Animated_3_Gear_Row.gif)
+
+There are 2 properties of interest here: amount of rotations and radius of rotation. The red (smallest) gear makes more rotations than the others. This is because it is smaller and has less teeth, so it takes less teeth to complete a rotation than with the other gears. The green (largest) gear makes less rotations than the others, but it has a larger radius. 
+
+Rotation speed is basically how fast rotations are performed, measured in rotations per minute (RPM). So the red gear is _faster_ to rotate.
+
+Torque (rotation force) is influenced by the radius of the rotation, so the larger gear (with the larger radius of rotation) _applies heigher torque_ than the others.
+
+Consider connecting a motor to shaft to the red gear, and connecting another output shaft from the green gear (which then connects to some mechanism). The motor will drive the red gear, bu this rotation will be converted from being fast to being with more torque, as the green gear (to which the mechanism is connected) applies more torque than the motor which is connected to the red gear, but be slower to rotate. The reverse is also true.
+
+Basically, this allows converting velovity to torque and torque to velocity, thus augmenting the capabilities of the motor for a specific need. For example, given a pretty heavy system we must lift with a motor, we would require heigher torque to raise it, so we would want to use a gear which converts from speed to torque. 
+
+We describe this rotation with a ratio of $driver : driven$, indicating the amount of rotations that driver (motor connected gear) does compared to the rotations of the driven (gear with output shaft). A ratio of $12 : 1$ indicates that for every 12 rotations of the motor, the output does 1 rotation. This is a torque conversion ratio, as these 12 rotations are converted into torque instead of speed leading to slower rotation of the output shaft.
