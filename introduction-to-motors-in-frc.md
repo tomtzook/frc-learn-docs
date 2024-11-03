@@ -32,6 +32,8 @@ FRC motors are rated for 12V voltage. When supplied with such voltage they rotat
 
 When freely rotating (i.e. rotating without something interrupting the motion), a DC motor will draw minimal current and apply minimal torque (minimal = close to 0 as possible). However, as soon as something is resisting the motion (could be friction, gravity) the motor will start drawing more current and thus will apply more torque. This increases until a motor reaches its _stall_ state, where it is unable to overcome the counteracting force. At this state, it draws the maximum current (can reach up to 130A, depending on the motor) and applies the maximum possible torque.
 
+![motor curve](https://github.com/user-attachments/assets/ed32c1fd-9d00-4f2a-8e99-d41d889efa79)
+
 Due to [Ohm's law](https://en.wikipedia.org/wiki/Ohm%27s_law), we know that there is a relationship between Voltage and Current. As such we can understand that If we supply only a 6V voltage, we will have a proportional limit on the amount of current the motor may draw. Thus, by controlling the voltage, we basically control the maximum speed (when freely rotating) and maximum torque (when stalled).
 
 ### Motor Controllers
