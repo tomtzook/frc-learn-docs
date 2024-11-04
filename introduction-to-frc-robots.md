@@ -106,3 +106,7 @@ For a robot, or any mechanism, to move and operate, there is a requirement for s
 
 
 One can attach motors to wheels, drums, shafts and more. With the application of power to the motor, we receive a motion. By controlling this, we control the motion of the robot.
+
+## Further Reading
+
+- [ History of FRC Drivetrains](https://www.youtube.com/watch?v=hDBuCylYlek)
