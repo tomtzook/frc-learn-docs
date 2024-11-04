@@ -61,14 +61,27 @@ Controlling an arm system typically involves controlling the joint arm as to mov
 
 ### Elevators
 
+Elevators provide both floor and high vertical reach. They can be used to lift objects from lower heights to higher heights, and vice versa. They typically require some proximity to what they are lifting (i.e. the robot must be very close to an object to lift it), but can handle quite a bit of weight.
+
 ![elevator 1](https://github.com/user-attachments/assets/cf7c34bc-2f83-4b96-82fe-2c0d23ad982b)
+
+An elevator (similar to real life elevators) are composed of a shaft, which is empty and provides a space for vertical motion, and a carriage which is the actual elevator and moves up and down in a shaft. The motion is dependent on a motor which pulls the carriage up, or lowers it.
+
+A typical design will use a motor which pulls on a rope (attached to the carriage) and thus raises the elevator. To lower it, the motor releases rope and gravity pulls the carriage down. Other designs exist however.
 
 ![elevator 2](https://github.com/user-attachments/assets/1cd5a110-4674-4cf7-8073-73d5f3a95ff7)
 
+Most elevators will have some other mechanism in the carriage. This mechanism would allow the elevator to capture and hold some game piece.
 
 ### Shooters
 
+Shooters mechanisms allow, basically, to _shoot_ a game piece out of the robot at range. This provides a robot with the capability to launch something to a distant target, typically a target at height. One could think of it as if shooting a hoop in basketball - trying to score the ball into the high basket. 
+
+A few games in recent history did involve scoring a piece into a basket facsimile.
+
 ![shooter 1](https://github.com/user-attachments/assets/e8039838-d90d-43bf-9456-ffabf8c184ce)
+
+Most shooters use a set of wheels, rotated at high speeds by motors. When a piece is fed into these wheels they push it out at speed, throwing it a certain distance and height.
 
 ![shooter 2](https://github.com/user-attachments/assets/0d77941e-b2bd-4655-8639-061ab3d120ed)
 
@@ -85,3 +98,11 @@ Controlling an arm system typically involves controlling the joint arm as to mov
 
 ![intake 2](https://github.com/user-attachments/assets/5d3052af-024d-4b19-9b5e-1df53c487558)
 
+## Motion 
+
+For a robot, or any mechanism, to move and operate, there is a requirement for some device to create this motion. As the previous section may have illustrated - motors are a primary choice for FRC robots. They provide a controllable rotational motion, which may also be converted to linear motion. 
+
+![cim motor](https://github.com/user-attachments/assets/16957807-3851-4153-a507-81379536ef44)
+
+
+One can attach motors to wheels, drums, shafts and more. With the application of power to the motor, we receive a motion. By controlling this, we control the motion of the robot.
