@@ -1,5 +1,6 @@
 Robots, by definition, come in so many forms and designs. This is very expected, as the design of the robot is directly influenced by its purpose. 
 The same thing can be said about frc robots, however this is up to a limit. As FRC robots actually have many basic properties and design which are shared. So despite having many different teams working on robots, we will see quite a few similarities between the robots.
+
 In FRC, robots are designed following the requirements for the specific competition/game they are meant to play. So many (if not all) of the decisions about how the robot is composed and what it can do and how are dictated but the game. 
 Moreover, FRC teams typically follow very specific design concepts and philosphies to robot building and as such, familiarizing ourselves with these will allow us to understand how the robot functions and how it can be controlled and operated.
 
@@ -40,5 +41,47 @@ in place. It is also possible to combine different powers and directions to each
 
 #### Swerve 
 
+### Arms
 
+Arms are flexible systems providing further reach to a ground-based chassis. They can come in many configurations with different advantages and disadvantages, but are generally used to reach upwards, or further ahead of the chassis. 
+
+![arm 1](https://github.com/user-attachments/assets/0515d52a-cf6b-4b72-9c9a-098e6b47165e)
+
+Arms are usually characterized by the amount of joints they have. Each joint provide an additional degree of freedom. Though 1-joint arms is most common, 2-joint arms might be occasitionally seen.
+
+Each joint is powered by a motor attached to a shaft which holds the arm. Rotating this shaft will rotate the arm, raising it upwards or lowering it downwards.
+
+![arm 2](https://github.com/user-attachments/assets/8427f938-1037-45ee-9cc5-a0f175ad61a4)
+
+It is not uncommon to see an additional system or component attached to the end or front of the arm. This basically provides that system with a reach out of the chassis. It can be used on game pieces placed on top of things, or reach the ground better. Examples may include clamps to hold an item, or intake to collect items into the robot.
+
+![arm 3](https://github.com/user-attachments/assets/3b700cf7-59bf-437c-85a0-17d69a28fe81)
+
+Controlling an arm system typically involves controlling the joint arm as to move the arm into a specific position, usually indicated by the angle between the arm and the chassis. Different angles (positions) are used for different operations with the arm. Keeping the arm in place also requires some work, as gravity keeps working to lower it. 
+
+### Elevators
+
+![elevator 1](https://github.com/user-attachments/assets/cf7c34bc-2f83-4b96-82fe-2c0d23ad982b)
+
+![elevator 2](https://github.com/user-attachments/assets/1cd5a110-4674-4cf7-8073-73d5f3a95ff7)
+
+
+### Shooters
+
+![shooter 1](https://github.com/user-attachments/assets/e8039838-d90d-43bf-9456-ffabf8c184ce)
+
+![shooter 2](https://github.com/user-attachments/assets/0d77941e-b2bd-4655-8639-061ab3d120ed)
+
+### Turrets
+
+![turret 1](https://github.com/user-attachments/assets/1e71f49d-32ae-4009-a4f1-b1cafff0ea44)
+
+![turret 2](https://github.com/user-attachments/assets/334e9a9c-8a11-4345-b050-91200e5b7dd9)
+
+
+### Intake
+
+![intake 1](https://github.com/user-attachments/assets/16053c25-ee95-41c7-96e9-582452ff88eb)
+
+![intake 2](https://github.com/user-attachments/assets/5d3052af-024d-4b19-9b5e-1df53c487558)
 
