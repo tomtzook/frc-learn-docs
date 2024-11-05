@@ -45,33 +45,34 @@ in place. It is also possible to combine different powers and directions to each
 
 Arms are flexible systems providing further reach to a ground-based chassis. They can come in many configurations with different advantages and disadvantages, but are generally used to reach upwards, or further ahead of the chassis. 
 
-![arm 1](https://github.com/user-attachments/assets/0515d52a-cf6b-4b72-9c9a-098e6b47165e)
-
 Arms are usually characterized by the amount of joints they have. Each joint provide an additional degree of freedom. Though 1-joint arms is most common, 2-joint arms might be occasitionally seen.
 
 Each joint is powered by a motor attached to a shaft which holds the arm. Rotating this shaft will rotate the arm, raising it upwards or lowering it downwards.
 
-![arm 2](https://github.com/user-attachments/assets/8427f938-1037-45ee-9cc5-a0f175ad61a4)
-
 It is not uncommon to see an additional system or component attached to the end or front of the arm. This basically provides that system with a reach out of the chassis. It can be used on game pieces placed on top of things, or reach the ground better. Examples may include clamps to hold an item, or intake to collect items into the robot.
 
-![arm 3](https://github.com/user-attachments/assets/3b700cf7-59bf-437c-85a0-17d69a28fe81)
-
 Controlling an arm system typically involves controlling the joint arm as to move the arm into a specific position, usually indicated by the angle between the arm and the chassis. Different angles (positions) are used for different operations with the arm. Keeping the arm in place also requires some work, as gravity keeps working to lower it. 
+
+<p align=center>
+<img src="https://github.com/user-attachments/assets/0515d52a-cf6b-4b72-9c9a-098e6b47165e" width="360">
+<img src="https://github.com/user-attachments/assets/8427f938-1037-45ee-9cc5-a0f175ad61a4" width="360">
+<img src="https://github.com/user-attachments/assets/3b700cf7-59bf-437c-85a0-17d69a28fe81" width="360">
+</p>
 
 ### Elevators
 
 Elevators provide both floor and high vertical reach. They can be used to lift objects from lower heights to higher heights, and vice versa. They typically require some proximity to what they are lifting (i.e. the robot must be very close to an object to lift it), but can handle quite a bit of weight.
 
-![elevator 1](https://github.com/user-attachments/assets/cf7c34bc-2f83-4b96-82fe-2c0d23ad982b)
-
 An elevator (similar to real life elevators) are composed of a shaft, which is empty and provides a space for vertical motion, and a carriage which is the actual elevator and moves up and down in a shaft. The motion is dependent on a motor which pulls the carriage up, or lowers it.
 
 A typical design will use a motor which pulls on a rope (attached to the carriage) and thus raises the elevator. To lower it, the motor releases rope and gravity pulls the carriage down. Other designs exist however.
 
-![elevator 2](https://github.com/user-attachments/assets/1cd5a110-4674-4cf7-8073-73d5f3a95ff7)
-
 Most elevators will have some other mechanism in the carriage. This mechanism would allow the elevator to capture and hold some game piece.
+
+<p align=center>
+<img src="https://github.com/user-attachments/assets/cf7c34bc-2f83-4b96-82fe-2c0d23ad982b" width="360">
+<img src="https://github.com/user-attachments/assets/1cd5a110-4674-4cf7-8073-73d5f3a95ff7" width="360">
+</p>
 
 ### Shooters
 
@@ -79,34 +80,55 @@ Shooters mechanisms allow, basically, to _shoot_ a game piece out of the robot a
 
 A few games in recent history did involve scoring a piece into a basket facsimile.
 
-![shooter 1](https://github.com/user-attachments/assets/e8039838-d90d-43bf-9456-ffabf8c184ce)
-
 Most shooters use a set of wheels, rotated at high speeds by motors. When a piece is fed into these wheels they push it out at speed, throwing it a certain distance and height.
 
-![shooter 2](https://github.com/user-attachments/assets/0d77941e-b2bd-4655-8639-061ab3d120ed)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/e8039838-d90d-43bf-9456-ffabf8c184ce" width="360">
+<img src="https://github.com/user-attachments/assets/0d77941e-b2bd-4655-8639-061ab3d120ed" width="360">
+</p>
 
 ### Turrets
 
-![turret 1](https://github.com/user-attachments/assets/1e71f49d-32ae-4009-a4f1-b1cafff0ea44)
+Turrets are mounts for other systems that provide the capability to rotate the mounted system around the Z axis. That is, the mounted system may be oriented to face multiple directions without rotating the robot itself. It adds a degree of freedom independent from chassis motion. 
 
-![turret 2](https://github.com/user-attachments/assets/334e9a9c-8a11-4345-b050-91200e5b7dd9)
+In many cases turrets serve as mounts for shooters, but may mount other systems if wanted and designed properly.
 
+They are operated by an attached motor which spins the turrets clockwise or counter-clockwise. This motion is typically limited due to design problems, so the turret can only rotate up to a point. It is quite rare to see a 360-capable turret.
+
+<p align=center>
+<img src="https://github.com/user-attachments/assets/1e71f49d-32ae-4009-a4f1-b1cafff0ea44" width="360">
+<img src="https://github.com/user-attachments/assets/334e9a9c-8a11-4345-b050-91200e5b7dd9" width="360">
+</p>
 
 ### Intake
 
-![intake 1](https://github.com/user-attachments/assets/16053c25-ee95-41c7-96e9-582452ff88eb)
+Intake mechanism provide the ability to catch and hold a game piece from the environment. For example, catching a ball from the floor and holding it in the robot to shoot. Such systems are not intended to score any points, but simply collect a game piece to be used later. 
 
-![intake 2](https://github.com/user-attachments/assets/5d3052af-024d-4b19-9b5e-1df53c487558)
+Common designs use a set of motorized wheels which, when rotating, pull the game piece inwards. Once the piece was collected, it may be held in the intake itself, or passed onward to another system. 
+
+Because intakes are collecting pieces for other systems to use, they typically need a way to transfer the piece to another system.
+
+<p align=center>
+<img src="https://github.com/user-attachments/assets/16053c25-ee95-41c7-96e9-582452ff88eb" width="360">
+<img src="https://github.com/user-attachments/assets/5d3052af-024d-4b19-9b5e-1df53c487558" width="360">
+</p>
+
+### Other System
+
+Although there are some common examples, they are also a numorous other ways to design systems and use them. So there is no real _one size fits all_, it is rather very specialized for a specific game and team decisions. One can also combine aspects of different systems into one, or seperate one system into two and so forth.
+
+Don't limit you imaginations to what was shown here, but rather use what we've seen as examples.
 
 ## Motion 
 
 For a robot, or any mechanism, to move and operate, there is a requirement for some device to create this motion. As the previous section may have illustrated - motors are a primary choice for FRC robots. They provide a controllable rotational motion, which may also be converted to linear motion. 
 
-![cim motor](https://github.com/user-attachments/assets/16957807-3851-4153-a507-81379536ef44)
-
-
 One can attach motors to wheels, drums, shafts and more. With the application of power to the motor, we receive a motion. By controlling this, we control the motion of the robot.
+
+<p align=center>
+<img src="https://github.com/user-attachments/assets/16957807-3851-4153-a507-81379536ef44" width="360">
+</p>
 
 ## Further Reading
 
-- [ History of FRC Drivetrains](https://www.youtube.com/watch?v=hDBuCylYlek)
+- [History of FRC Drivetrains](https://www.youtube.com/watch?v=hDBuCylYlek)
