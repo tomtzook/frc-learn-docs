@@ -8,21 +8,27 @@ Motors provide FRC robots with force and motion. They are the base for designing
 FRC robots are limited to use DC (Direct Current) motors. Such motors are operated by providing Direct Current from a power source. 
 This is enforced by the game rules. In fact, the game rules only allow using specific motors verified by FIRST. 
 
-![dc motor](https://github.com/user-attachments/assets/c64d0056-3b30-4fe2-949c-8c200d3c22eb)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/c64d0056-3b30-4fe2-949c-8c200d3c22eb" width="360">
+</p>
 
 Legal motors can typically rotate up to 5800 RPM and provide a max of around 2.4 Nm torque. This is more than sufficent for robots. The selection of a specific motor is very dependent on system requirement, funds, control requirments and such. So we will see a combination of different motors on a robot.
 
 Normally, a motor will be used by connecting its output shaft (the rotating part) to a bigger shaft/axle which causes a rotation of some mechanism. This may be a wheel,
 a shaft mounting some arm, or more. Regardless, motors always produce a rotational motion and this may be used for rotating mechanisms, or converted to linear motion.
 
-![motor mounted to wheel](https://github.com/user-attachments/assets/9d2b9fee-24bf-4f38-944b-9dd8576e3335)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/9d2b9fee-24bf-4f38-944b-9dd8576e3335" width="360">
+</p>
 
 The example above shows a motor attached to a wheel. As the motor rotates, so will the wheel.
 
 DC motors are built on the concepts of magnets and magnetic fields. By passing a Direct Current through coils, a magnetic field is generated which pulls/pushes on magnets. This creates a rotational motion.
 There are 2 derivatives to this design: Brushed and Brushless; Each is a bit different, but both use the same basic principles.
 
-![brushed dc motor](https://github.com/user-attachments/assets/77cd167c-b096-48d4-a659-73d477d20780)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/77cd167c-b096-48d4-a659-73d477d20780" width="360">
+</p>
 
 #### Brushless Motors
 
@@ -30,7 +36,9 @@ Brushless motors are actually quite more complex in how they operate. The same b
 
 For brushed motors it is enough to apply a current through the circuit to acheive motion, this is thanks to a component called _brush_. However, for brushless motors one  must manually alternate current flow in the motor to acheive continous rotation. Failing to do so, the motor will get stuck in place due to a static magnetic field having balanced forces in the motor. 
 
-![brushless dc motor](https://github.com/user-attachments/assets/cee848fe-c9c5-4cc7-88d4-ee86ef416000)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/77cd167c-b096-48d4-a659-73d477d20780" width="360">
+</p>
 
 This is why brushless motors have 3 wires instead of two: each wire is used in sequence to create a continous motion, depending on the current position of the rotor. Such motors may also be equipped with internal sensor to allow tracking this position.
 
@@ -56,7 +64,9 @@ Motor controllers are electronic devices which take the rule of controlling the 
 
 Because of the differances between Brushed and Brushless motors, once should use motor controllers capable of controlling the specific type of motor. For example, a _TalonSRX_ motor controller is only capable of operating a Brushed motor.
 
-![talonsrx](https://github.com/user-attachments/assets/88cef2dc-4e4a-4e69-b025-caf922a3314d)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/88cef2dc-4e4a-4e69-b025-caf922a3314d" width="360">
+</p>
 
 For FRC use, they are essential, as controlling the power supply and behaviour of a motor requires a specialized circuit per motor, thus, our robot computer cannot perform this job itself.
 
@@ -86,7 +96,9 @@ As can been seen, FRC made a big move towards brushless motors in recent years. 
 
 Transmitions (aka gearboxes) are mechanical devices composed of gears and typically attached to the output shafts of motors. They allow modifiying the direction, speed and torque of the rotational motion of the motor. 
 
-![gearbox](https://github.com/user-attachments/assets/540f55db-8100-4f98-93a6-6daccade52a9)
+<p align=center>
+<img src="https://github.com/user-attachments/assets/540f55db-8100-4f98-93a6-6daccade52a9" width="360">
+</p>
 
 Consider the set of gears below:
 
