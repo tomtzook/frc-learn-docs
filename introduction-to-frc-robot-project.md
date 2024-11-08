@@ -54,13 +54,12 @@ The files and folders related to gradle are
 - `build.gradle`: build configuration
 - `settings.gradle`: project configuration
 
-Do not touch these unless you know what you are doing. One could easily break the build configuration.
-
 Because this is an FRC project, there are several files and folders specific for FRC use:
 - `.wpilib/`: _WPILib_ project configuration
 - `vendordeps/`: _WPILib_ and third-party libraries declerations
 
-Again, do not touch these unless you know what you are doing.
+> [!WARNING]
+> Do not touch any of the files/folders mentioned above unless you know what you are doing. This could easily break the project.
 
 The code itself is located under `src/main/java`. You will notice it has both several packages and _Java Class_ files. In here we will write our robot code.
 
@@ -261,6 +260,10 @@ while (robotIsRunnning) {
 
 Of course, this is just a pseudo code, but it illustrates the idea of the robot loop.
 
+Typically, when working on a specific mode, we would use the `init` method to initialize operations for that mode. We would use `periodic` to perform the main logic of the mode, and we would use `exit` to stop/deinitialize operations for the mode. 
+
+The selection of which mode to write code for depends on the code. Code intended for human-operator use will be placed in `teleop` methods. Code intended for robot autonomous mode will be placed in `autonomous` method. Recall that the game is divided into $2:15$ minutes of _teleop_ and $0:15$ minutes of _autonomous. 
+
 ### RobotMap
 
 `RobotMap` is a simple utility class. We typically place constants in it so that we have an organized location to find all constants.
@@ -270,7 +273,7 @@ package frc.robot;
 
 public class RobotMap {
 
-  // example constants
+  // example constant
   public static final double ROBOT_LENGTH_METERS = 0.5; // 50 cm
 
 }
