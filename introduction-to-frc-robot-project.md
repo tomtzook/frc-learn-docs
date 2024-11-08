@@ -230,6 +230,8 @@ while (robotIsRunnning) {
         testInit(); // our code
         break;
     }
+
+    lastMode = currentMode;
   }
 
   // call periodic method
