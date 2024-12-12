@@ -1,4 +1,4 @@
-### Encoders
+## Encoders
 
 Encoder sensors measure the position and rotation of a shaft. They are quite reliable and versatile and we'll see them quite often in FRC robots because of that. Like limit switches, 
 they can be implemented in several ways, mostly commonly optical or magnetic. 
@@ -6,7 +6,7 @@ they can be implemented in several ways, mostly commonly optical or magnetic.
 Optical encoders use light transmitter and receiver and a disk attached to the shaft, the light sensor detect the rotation of the disk on the shaft and uses it to measure the rotation. 
 Magnetic encoders use magnets attached to the shaft and measure the changes in magnetic fields to measure the rotation.
 
-#### Absolute Encoders
+### Absolute Encoders
 
 Absolute encoders are constructed to measure the absolute positioning of the shaft. That is, each position in the shaft is assigned a unique value which the sensor can detect while on. 
 So no matter the position, how many rotations, the sensor will report a specific position accuractly as the same position. Even if we turn off the sensor, move the shaft and turn it on again, it will
@@ -37,28 +37,7 @@ see a change in position every 22.5 degrees from 0. So we will know when we are 
 These sensors usually communicate via parallel, serial or PWM. We will use them when we need to know the specific positioning of the shaft. Like for an arm rotating around a shaft. Magnetic ones operate
 in a similar concept to the optical, but instead of a disk and light, it uses magnets and magnetic sensors. 
 
-The `DutyCycleEncoder` class can be used to read PWM output encoders:
-```java
-public class Robot extends TimedRobot {
-  
-  private DutyCycleEncodr encoder;
-
-  @Override
-  public void robotInit() {
-	// encoder connected to DIO pin 0
-	encoder = new DutyCycleEncoder(0);
-  }
-  ...
-  @Override
-  public void teleopPeriodic() {
-    	double posPercentage = encoder.getAbsolutePosition();
-	double posAngles = posPercentage * 360.0;
-  }
-  ...
-}
-```
-
-#### Relative
+### Relative
 
 Relative encoders are constructor to detect changes/motion of the shaft. They do not provide absolute positioning, but rather report on changes in position. That is, each time the shaft rotates a set
 amount of degrees, the sensor will tell us of this. It is relative, because the sensor doesn't assign unique position to each part of the shaft, but rather just counts how it rotates. So when the sensor is turned on, the position will always be zero and counted from there, no matter how the shaft is, thus the position is relative to how the shaft was when the sensor started.
@@ -87,32 +66,7 @@ Thanks to these techniques, relative encoders provide an excellent way to measur
 
 To work with such sensors, we count the amount of pulses on the channels. If the pulse comes on A before B, we increase the count by 1, if it comes on B before A, we decrease the count by 1. So when we rotate clockwise we get an increasing count, when rotating counter-clockwise, we get a decrease count. This gives us a direction along this count information. We can then convert this count into actual positioning and speed.
 
-To read quadrature encoders, we need to connect the sensor to two digital input pins, one for channel A and another channel B. We can use the `Encoder` class to read from it. It is based on the `Counter`, which is capable of counting pulses and their length.
-```java
-public class Robot extends TimedRobot {
-  
-  private Encoder encoder;
-
-  @Override
-  public void robotInit() {
-	// channel A to pin 0, channel B to pin 1
-	encoder = new Encoder(0, 1);
-	// configure the encoder's PPR data. We'll make it configured to returning degrees.
-	// Say the PPR is 1024, so to get degrees, we need to configure how many degrees we get per pulse: 360/1024
-	encoder.setDistancePerPulse(360.0/1024.0);
-  }
-  ...
-  @Override
-  public void teleopPeriodic() {
-    	double degrees = encoder.getDistance();
-	double degreesPerSecond = encoder.getRate();
-	boolean direction = encoder.getDirection();
-  }
-  ...
-}
-```
-
-
+### On Gears
 
 When we place encoders, we should also take into consideration gear boxes. Gear boxes are mechanical devices we are used to either increase a motor's torque, or its speed. It does this by using toothed gears. If we connect the motor to a smaller gear, and the gear is tied to a larger one and we place the shaft on the larger gear, we get an increase in torque, since the radius of the rotating object increases the torque of the rotation. If we do the opposite, we get an increase of speed. 
 
@@ -142,6 +96,25 @@ Because the encoder is mounted on the shaft, which is the arm's axis of motion (
 The resolution of the sensor is 10 bit, with values from 0 to 1024. This gives a precision of ${306 \over 1024} = 0.35 \ degrees$. This is the smallest change we can see. This is good enough for our needs, because we only need to detect two positions for the arm (shooter and collect positions).
 
 The sensor uses a PWM output, with 1us pulse being 0 degrees and 1024us being 360 degrees. The frequency of output is 975.6 Hz, which means that the pulse is sent every 1.025ms. For a 20ms loop (like our periodics) we'll get 19.5 updates from the sensors for each run of our loop. We'll use `DutyCycleEncoder` to read this info. 
+```java
+public class Robot extends TimedRobot {
+  
+  private DutyCycleEncodr encoder;
+
+  @Override
+  public void robotInit() {
+	// encoder connected to DIO pin 0
+	encoder = new DutyCycleEncoder(0);
+  }
+  ...
+  @Override
+  public void teleopPeriodic() {
+    	double posPercentage = encoder.getAbsolutePosition();
+	double posAngles = posPercentage * 360.0;
+  }
+  ...
+}
+```
 
 #### Operation Mode: Relative
 
@@ -156,6 +129,32 @@ The sensor has 2048 Pulses Per Revolution. So if the sensor reads a full revolut
 When the sensor reads clockwise rotations it sends the pulse on pin `A` first, and then sends a pulse on pin `B`. This means that if we get a pulse on pin `A` first, we know that we are rotating clockwise. The reverse thing occurs for counter clockwise rotation. So we know the motion direction.
 The speed of rotation can be calculated by measuring the time between two pulses on pin `A` or on pin `B`. We know that a pulse is sent for every `0.175` degrees. So for two pulses, the speed is `0.175/time between pulses`.
 
+To read the encoder in this mode, we need to connect the sensor to two digital input pins, one for channel A and another channel B. We can use the `Encoder` class to read from it. It is based on the `Counter`, which is capable of counting pulses and their length.
+```java
+public class Robot extends TimedRobot {
+  
+  private Encoder encoder;
+
+  @Override
+  public void robotInit() {
+	// channel A to pin 0, channel B to pin 1
+	encoder = new Encoder(0, 1);
+	// configure the encoder's PPR data. We'll make it configured to returning degrees.
+	// Say the PPR is 2048, so to get degrees, we need to configure how many degrees we get per pulse: 360/2048.
+	// We can also configure it to return other converted data, like distance of wheel on the floor, just need to manipulate the calculation accordingly.
+	encoder.setDistancePerPulse(360.0/2048.0);
+  }
+  ...
+  @Override
+  public void teleopPeriodic() {
+    	double degrees = encoder.getDistance();
+	double degreesPerSecond = encoder.getRate();
+	boolean direction = encoder.getDirection();
+  }
+  ...
+}
+```
+
 ### SRX Magnetic Encoder
 
 ![SRX magnetic encoder](https://github.com/user-attachments/assets/e33f40c2-827e-44a5-9041-4148e35de848)
@@ -165,8 +164,6 @@ The SRX Magnetic encoder is a magnetic encoder capable of both absolute and rela
 Because the sensor is connected to the talon, we do not read the sensor data from the DIO pins of the RoboRIO, but rather we used CANBus messages to get the information. The TalonSRX will periodically send us this information and we can access it via the `WPI_TalonSRX` class we use to control the motor controller.
 
 The encoder has 4096 PPR, giving it excellent precision, with a pulse being sent every ${360 \over 4096} = 0.087 \ degrees$.
-
-For our drive, we mount it on the output shaft of the drive gear boxes, making it measure the rotation of the output shaft. This shaft is connected to wheels, so the encoder actually measures the rotation of the wheels. We can then use it to measure the speed of the wheels and also the distance the drive on the ground. We do not need to take the gear box into consideration, because it is mounted on the output shaft, not on the motor shaft.
 
 To measure the speed of the wheels we simply need to measure the speed of the shaft. To measure the distance the wheels drive on the ground, we need to measure the amount of rotations they made. Each rotation of the wheel is equal to a distance driven of the circumference of the wheel, which is $2 * \Pi * radius$.
 
@@ -203,11 +200,10 @@ public class Robot extends TimedRobot {
 
 Every NEO motor comes with an integrated magnetic relative encoder which is connected directly to the SparkMAX motor controller. It is normally used by the SparkMax to control the motor because it is a brushless motor, and thus requires tracking of position changes. But we can also use it for our own purposes. 
 
-Because it connects to the SparkMAX, like with the SRX encoder, we read it from the motor controller over CANBus messages. 
+Because it connects to the SparkMAX, we read it from the motor controller over CANBus messages. 
 
-We use these sensors on the shooter to measure the speed of rotation of the wheels, so that we can make sure we shoot the notes at a specific speed. 
-
-The encoder has 42 _counts_ per revolution, which is quite a low resolution, as it can only see a change of ${360 \over 42} = 8.57 \ degrees$. However, this is okay for speed measurements, because when the motor rotates pretty fast (say 1000 RPM) then we have 1000 rotations per minute, and with each rotation being 42 counts, we get 42000 counts. So we actually have enough counts to accuractly measure the speed of rotation. 
+The encoder has 42 _counts_ per revolution, which is quite a low resolution, as it can only see a change of ${360 \over 42} = 8.57 \ degrees$. However, this is okay for speed measurements, because when the motor rotates pretty fast (say 1000 RPM) then we have 1000 rotations per minute, and with each rotation being 42 counts, we get 42000 counts. So we actually have enough counts to accuractly measure the speed of rotation. For position measurements this can indeed be a problem. Although, usually
+there would be a gearbox to which the motor is mounted (instead of directly connecting it to the mechanism), this will increase our resolution and thus solve the issue.
 
 ```java
 public class Robot extends TimedRobot {
