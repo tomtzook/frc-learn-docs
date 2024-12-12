@@ -1,7 +1,6 @@
 ## Encoders
 
-Encoder sensors measure the position and rotation of a shaft. They are quite reliable and versatile and we'll see them quite often in FRC robots because of that. Like limit switches, 
-they can be implemented in several ways, mostly commonly optical or magnetic. 
+Encoder sensors measure the position and rotation of a shaft. They are quite reliable and versatile and we'll see them quite often in FRC robots because of that.
 
 Optical encoders use light transmitter and receiver and a disk attached to the shaft, the light sensor detect the rotation of the disk on the shaft and uses it to measure the rotation. 
 Magnetic encoders use magnets attached to the shaft and measure the changes in magnetic fields to measure the rotation.
@@ -33,6 +32,10 @@ When we select a sensor, we will need to take this into consideration. This is i
 see a change in position every 22.5 degrees from 0. So we will know when we are at 0, 22.5, 45, 67.5 and so on. 
 
 ![optical absolute encoder gif](https://www.akm.com/content/dam/site/akm/products/rotation-angle-sensor/tutorial/r1000-mv-encoder-base-fig3_6.gif)
+
+We would typically use rotations or degrees as our measurement units when working with such encoders. Do note that due to the nature of the encoder, its value wraps around. In rotations the value will be limited to 0->1 (and 0->360 in degrees). 
+
+We would normally use them to track exact position of a rotational system, like arm or turret (system where motion is limited to 0->360 at max).
 
 These sensors usually communicate via parallel, serial or PWM. We will use them when we need to know the specific positioning of the shaft. Like for an arm rotating around a shaft. Magnetic ones operate
 in a similar concept to the optical, but instead of a disk and light, it uses magnets and magnetic sensors. 
@@ -66,6 +69,10 @@ Thanks to these techniques, relative encoders provide an excellent way to measur
 
 To work with such sensors, we count the amount of pulses on the channels. If the pulse comes on A before B, we increase the count by 1, if it comes on B before A, we decrease the count by 1. So when we rotate clockwise we get an increasing count, when rotating counter-clockwise, we get a decrease count. This gives us a direction along this count information. We can then convert this count into actual positioning and speed.
 
+Because such encoders are quite versatile we may use them to measure the position of a shaft (in rotations/degrees), the linear distance passed by a wheel on the floor (in meters) or something else. This all depends on a specific use case. Do note that the value from such encoders does not wrap around and will continue to count as long as there is motion (only limited by memory size).
+
+We would normally use them to measure velocity for shooters and wheels, or measure linear distance passed by wheeled systems. So they can be placed on drive systems, elevators collectors and shooters. However, they are also used for for arms (to measure position/angle) and other systems. 
+
 ### On Gears
 
 When we place encoders, we should also take into consideration gear boxes. Gear boxes are mechanical devices we are used to either increase a motor's torque, or its speed. It does this by using toothed gears. If we connect the motor to a smaller gear, and the gear is tied to a larger one and we place the shaft on the larger gear, we get an increase in torque, since the radius of the rotating object increases the torque of the rotation. If we do the opposite, we get an increase of speed. 
@@ -75,6 +82,17 @@ When we place encoders, we should also take into consideration gear boxes. Gear 
 Gears are measured by the teeth ratio between the _driver_ gear (where the motor is connected) to the _driven_ gear (where the shaft is connected). A ratio of `6 : 1` means that for every 6 rotations of the motor, the shaft is rotate 1 full rotations. We get slower speed, but more torque. Each full rotation of the motor is equal to a 1/6 rotation of the shaft.
 
 If we have an encoder connected to the motor, which is then connected to a gear box, then the encoder measures the motion of the motor, but not the output shaft. To measure the shaft, we must make convert the output of the encoder to consider the gear box. For a `6 : 1` ratio, we can convert by dividing the encoder output by `6`. So if the encoder has sent 1024 pulses out of 1024 PPR, then the rotation of the shaft is ${1024 \over 6}$.  
+
+### On Conversions and Representations
+
+### Comparison
+
+ |  | Absolute | Relative
+ |--|----------|-----------
+ | Power On Value | Actual Position | 0 |
+ | Value Range (in rotations) | 0 -> 1 | Undefined, limited by memory |
+ | Best For | Absolute Position (rotational) of Shaft connected Mechanism | Position (linear) of shaft connected Mechanism, Velocity (rotational, linear) of shaft connected Mechanism |
+ | Gear Box | Problematic, doesn't translate through properly | No Problem, simple value conversion necessary |
 
 ## Common FRC Encoders
 
@@ -225,3 +243,7 @@ public class Robot extends TimedRobot {
   ...
 }
 ```
+
+### Comparison
+
+
