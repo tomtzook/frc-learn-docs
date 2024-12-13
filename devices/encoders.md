@@ -42,8 +42,8 @@ in a similar concept to the optical, but instead of a disk and light, it uses ma
 
 ### Relative
 
-Relative encoders are constructor to detect changes/motion of the shaft. They do not provide absolute positioning, but rather report on changes in position. That is, each time the shaft rotates a set
-amount of degrees, the sensor will tell us of this. It is relative, because the sensor doesn't assign unique position to each part of the shaft, but rather just counts how it rotates. So when the sensor is turned on, the position will always be zero and counted from there, no matter how the shaft is, thus the position is relative to how the shaft was when the sensor started.
+Relative encoders  detect changes/motion of the shaft. They do not provide absolute positioning, but rather report on changes in position. That is, each time the shaft rotates a set
+amount of degrees, the sensor will tell us of this. It is relative, because the sensor doesn't assign unique position to each part of the shaft, but rather just counts how it rotates. So when the sensor is turned on, the position will always be zero and counted from there, no matter how the shaft is oriented, thus the position is relative to how the shaft was when the sensor started.
 
 ![optical relative encoder](https://github.com/user-attachments/assets/419248ec-c657-407a-bb0f-8e01eae346b2)
 
@@ -51,7 +51,7 @@ Optical relative encoders use a disk placed on the shaft. Along the disk there a
 
 The amount of holes in the disk affects the resolution of the sensor. The more holes we have, the more precise the sensor is. Because the holes are evenly spaced, each hole seen is equal to a specific change in position. So having 10 holes, gives us a change of ${360 \over 10} = 36 \ degrees$ per hole. Resolution of such sensor is then measure by this amount. It is important to know the resolution of such sensors, as they determine how small of a change in motion we can see.
 
-Typically, the communicate using pulses. When the light sensor sees the led, the pulse is turned to high, and when it no longer sees the led, the pulse is turned to LOW. So each pulse starts when the led is infront of the hole and ends when it leaves it. If we count the pulses, we can basically count the amount of holes we've seen and thus the changes in position. But we can also measure the time between pulses to determine the velocity of the motion. Because the pulses are linked to the motion, the shorter the pulses and the closer they are together, the faster the rotation. So measuring the time between them, or their length, will be equal to the velocity.
+Typically, they communicate using pulses. When the light sensor sees the led, the pulse is turned to high, and when it no longer sees the led, the pulse is turned to LOW. So each pulse starts when the led is infront of the hole and ends when it leaves it. If we count the pulses, we can basically count the amount of holes we've seen and thus the changes in position. But we can also measure the time between pulses to determine the velocity of the motion. Because the pulses are linked to the motion, the shorter the pulses and the closer they are together, the faster the rotation. So measuring the time between them, or their length, will be equal to the velocity.
 
 ![channel A pulses](https://github.com/user-attachments/assets/52872c68-0bff-4195-ba1b-44b5ed53bf26)
 
@@ -82,6 +82,8 @@ When we place encoders, we should also take into consideration gear boxes. Gear 
 Gears are measured by the teeth ratio between the _driver_ gear (where the motor is connected) to the _driven_ gear (where the shaft is connected). A ratio of `6 : 1` means that for every 6 rotations of the motor, the shaft is rotate 1 full rotations. We get slower speed, but more torque. Each full rotation of the motor is equal to a 1/6 rotation of the shaft.
 
 If we have an encoder connected to the motor, which is then connected to a gear box, then the encoder measures the motion of the motor, but not the output shaft. To measure the shaft, we must make convert the output of the encoder to consider the gear box. For a `6 : 1` ratio, we can convert by dividing the encoder output by `6`. So if the encoder has sent 1024 pulses out of 1024 PPR, then the rotation of the shaft is ${1024 \over 6}$.  
+
+Relative encoders function fine through gears, because they can count over a full rotation. Howerver, absolute encoders do not. Consider: when the encoder measure the rotation of the small gear, with absolute encoder it resets after a full rotation (as it is limited to counting in a circle, range of 0->360). So when connected through a gear, the absolute encoder will only count the revolution of the small gear, but it doesn't translate well to the big gear (which operates the mechanism). Placing the absolute encoder _after_ the gears will work though.
 
 ### On Conversions and Representations
 
