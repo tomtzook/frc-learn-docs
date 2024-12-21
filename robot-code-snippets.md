@@ -1,4 +1,4 @@
-### Motor Basic Control (TalonSRX)
+### Motor Basic Control (Talon SRX)
 
 ```java
 private WPI_TalonSRX motor;
@@ -25,7 +25,7 @@ public void teleopExit() {
 }
 ```
 
-### Motor Basic Control (SparkMax)
+### Motor Basic Control (Spark Max)
 
 ```java
 private CANSparkMax motor;
@@ -52,7 +52,7 @@ public void teleopExit() {
 }
 ```
 
-### Motor Basic Control (TalonFX)
+### Motor Basic Control (Talon FX)
 
 ```java
 private TalonFX motor;
@@ -81,6 +81,37 @@ public void teleopPeriodic() {
 @Override
 public void teleopExit() {
     motor.setControl(neutralControl);
+}
+```
+
+### Basic Controller Axis Use (Talon SRX, Xbox, Right Y)
+
+```java
+private WPI_TalonSRX motor;
+private XboxController xbox;
+
+@Override
+public void robotInit() {
+    motor = new WPI_TalonSRX(RobotMap.MOTOR_IDENTIFIER);
+    motor.configFactoryDefault(); // factory default
+
+    xbox = new XboxController(0);
+}
+
+@Override
+public void teleopInit() {
+    
+}
+
+@Override
+public void teleopPeriodic() {
+    double speed = -xbox.getRightY();
+    motor.set(0.5);
+}
+
+@Override
+public void teleopExit() {
+    motor.stopMotor()
 }
 ```
 
