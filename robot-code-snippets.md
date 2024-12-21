@@ -190,7 +190,7 @@ public void teleopPeriodic() {
 }
 ```
 
-### Gyro Access (Pigeon2, Yaw)
+### Gyro Access (Pigeon 2, Yaw)
 
 ```java
 private Pigeon2 pigeon;
@@ -208,5 +208,83 @@ public void teleopPeriodic() {
     BaseStatusSignal.refreshAll(yawSignal); // only once per 20ms loop, typically in periodic
 
     double yawDegrees = yawSignal.getValueAsDouble(); 
+}
+```
+
+### Subsystem, Single Motor (NEO 1.1, Spark Max, NEO Integrated Encoder)
+
+```java
+public class SubsystemName extends SubsystemBase {
+
+    private final CANSparkMax motor;
+    private final RelativeEncoder encoder;
+
+    public SubsystemName() {
+        motor = new CANSparkMax(RobotMap.MOTOR_ID, CANSparkLowLevel.MotorType.kBrushless);
+        motor.restoreFactoryDefaults(); // factory default
+
+        encoder = motor.getEncoder();
+        encoder.setPositionConversionFactor(1 / RobotMap.MOTOR_TO_MECHANISM_GEAR_RATIO);
+        encoder.setVelocityConversionFactor(1 / RobotMap.MOTOR_TO_MECHANISM_GEAR_RATIO);
+    }
+
+    public double getPositionRotations() {
+        return encoder.getPosition();
+    }        
+
+    public double getVelocityRpm() {
+        return encoder.getVelocity();
+    }
+
+    public void move(double speed) {
+        motor.set(speed);
+    }
+
+    public void stop() {
+        motor.stop();
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("SubsystemName_Position", getPositionRotations());
+        SmartDashboard.putNumber("SubsystemName_Velocity", getVelocityRpm());
+    }
+}
+```
+
+### Command, Single Motor, Constant Speed, No Finish
+
+```java
+public class CommandName extends Command {
+
+    private final SubsystemName subsystem;
+    private final double speed;
+
+    public CommandName(SubsystemName subsystem, double speed) {
+        this.subsystem = subsystem;
+        this.speed = speed;
+
+        addRequirements(subsystem);
+    }
+
+    @Override
+    public void initialize() {
+        subsystem.move(speed);
+    }
+
+    @Override
+    public void execute() {
+        
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        subsystem.stop();
+    }
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }
 ```
