@@ -5,9 +5,12 @@
 [ data_type ] variable_name;
 [ data_type ] variable_name = initial_value;
 
+// declaring an int variable named num with the value 5
 int num = 5;
 
+// declaring a double variable named value without initial value defined.
 double value;
+// assigning 22.4 into variable value
 value = 22.4;
 ```
 
@@ -189,12 +192,12 @@ for ( initialize ; condition ; increment ) {
 
 Example
 ```java
-// example, run from 0 to 9 (inclusive)
+// run from 0 to 9 (inclusive)
 for (int i = 0; i < 10; i++) {
 
 }
 
-// example, run from 9 to 0 (inclusive)
+// run from 9 to 0 (inclusive)
 for (int i = 9; i >= 0; i--) {
 
 }
@@ -210,7 +213,7 @@ while ( condition ) {
 
 Example
 ```java
-// example, run from 0 to 5
+// run from 0 to 5
 int num = 0;
 while (num <= 5) {
     num++;
@@ -242,7 +245,7 @@ do {
 ### 1D Arrays
 
 ```java
-element_type[] variable_name;
+element_type[] variable_name; 
 element_type[] variable_name = new element_type [ array_size ] ;
 element_type[] variable_name = { value1, value2, value3, ... };
 
@@ -250,16 +253,20 @@ element_type name = variable_name [ index ];
 variable_name [ index ] = value;
 
 // example
-
+// declaring and initializing a new empty array of type int and size 10. array will be stored in the variable arr
 int[] arr = new int[10];
+// declaring and initializing a new array of type double. array will be stored in the variable nums. array elements will have the values specified and be of size 3.
 double[] nums = {22.1, 50, 34};
 
+// saving element in array arr at index 0 into variable a
 int a = arr[0];
+// saving value 53 into element in array arr at index 0
 arr[0] = 53;
 
-// iteration, full array, from start to end
+// iteration, full array, from start to end, printing each value in the array
 for (int i = 0; i < arr.length; i++) {
     int element = arr[i];
+    System.out.println(element);
 }
 ```
 
@@ -275,16 +282,19 @@ for (int i = 0; i < arr.length; i++) {
 
 // examples
 
+// method named printName, returning nothing (void), no parameters, public access, static
 public static void printName() {
-    statements
+    System.out.println("name");
 }
 
+// method named showNumbers, returning nothing (void), parameters a (int) and b (int), public access
 public void showNumbers(int a, int b) {
-    statements
+    System.out.println("a=" + a + ", b=" + b);
 }
 
+// method named sum, returning int, parameters a (int) and b (int), public access
 public int sum(int a, int b) {
-    return a + b;
+    return a + b; // return from method the sum of a+b
 }
 ```
 
@@ -301,7 +311,9 @@ method_name();
 method_name( parameters );
 return_type name = method_name( parameters );
 
+// call void method named printName, no parameters
 printName();
+// call method sumNumbers, with parameters 11 (a) and 90 (b), returning an int
 int sum = sumNumbers(11, 90);
 ```
 
@@ -408,14 +420,19 @@ Class_Name var_name;
 Class_Name var_name = new Class_Name();
 Class_Name var_name = new Class_Name( parameters );
 
+// declare variable for storing an instance of Person
 Person person;
+// declare variable for storing an instance of Person and assigning it a new instance of Person.
+// the new instance receives the parameters "Barak Obama", 25 into the constructor 
 Person person = new Person("Barak Obama", 25);
 
 // access
 type name = var_name.attribute;
 var_name.attribute = value;
 
+// save value of attribute age from instance in person variable, into variable a
 int a = person.age;
+// save value 55 into attribute age of the instance in person variable
 person.age = 55;
 
 // method invocation
@@ -423,7 +440,9 @@ var_name.method_name();
 var_name.method_name( parameters );
 return_type name = var_name.method_name( parameters );
 
+// call method getName of the instance in variable person. method returns String
 String name = person.getName();
+// call method walkDistance of instance in variable person. method returns void, receives 5 into parameter. 
 person.walkDistance(5);
 ```
 
