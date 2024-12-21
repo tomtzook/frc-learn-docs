@@ -28,3 +28,16 @@ SRX Magnetic Encoder | ![srx](https://github.com/user-attachments/assets/e33f40c
 NEO Integrated Encoder | ![neo](https://github.com/user-attachments/assets/fba94f61-589c-4bcc-a9ed-234ca1ff2f49) | Magnetic | Relative | 42 CPR | - | Quadrature | - | Spark Max, Spark Flex (only)
 Falcon 500 Integrated Encoder | | Magnetic | Relative, Absolute | 2048 PPR | 2048 | - | - | Talon FX (only)
 CAN Coder | ![canbus](https://github.com/user-attachments/assets/63e87f90-0b54-42ee-92c7-87f2f271e5af) | Magnetic | Relative, Absolute | 4096 PPR | 4096 | CANBus | CANBus | -
+
+### IMUs
+
+Name | Image | Manufacturer | Sensors | Features | Connection | Required Vendordep | Code Class
+-----|-------|--------------|---------|----------|------------|--------------------|------------
+Pigeon 2 | ![pigeon2](https://github.com/user-attachments/assets/ae9e3d40-638c-4e96-b38b-7ad7867122d4) | CTRE | 3-Axis Accelerometer, 3-Axis Gyroscope, 3-Axis Magnetometer | Pre-Calibrated, Full AHRS, Quaternion Output, Gravity Vector Output, Continous Yaw | CANBus | _Phoenix6_ | `com.ctre.phoenix6.hardware.Pigeon2`
+
+
+
+
+
+
+
