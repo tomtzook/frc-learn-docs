@@ -1,5 +1,7 @@
 ### Motor Basic Control (Talon SRX)
 
+Define and create a _Talon SRX_ motor controller. Run the motor at 50% (clockwise) during _teleop_.
+
 ```java
 private WPI_TalonSRX motor;
 
@@ -21,11 +23,13 @@ public void teleopPeriodic() {
 
 @Override
 public void teleopExit() {
-    motor.stopMotor()
+    motor.stopMotor();
 }
 ```
 
 ### Motor Basic Control (Spark Max)
+
+Define and create a _Spark Max_ motor controller. Run the motor at 50% (clockwise) during _teleop_.
 
 ```java
 private CANSparkMax motor;
@@ -48,11 +52,13 @@ public void teleopPeriodic() {
 
 @Override
 public void teleopExit() {
-    motor.stopMotor()
+    motor.stopMotor();
 }
 ```
 
 ### Motor Basic Control (Talon FX)
+
+Define and create a _Talon FX_ motor controller. Run the motor at 50% (clockwise) during _teleop_.
 
 ```java
 private TalonFX motor;
@@ -86,6 +92,8 @@ public void teleopExit() {
 
 ### Basic Controller Axis Use (Talon SRX, Xbox, Right Y)
 
+Define and create a _Talon SRX_ motor controller and an _XBOX_ controller. Run the motor during _teleop_ according to _Right Y_ axis of the gamepad.
+
 ```java
 private WPI_TalonSRX motor;
 private XboxController xbox;
@@ -111,11 +119,13 @@ public void teleopPeriodic() {
 
 @Override
 public void teleopExit() {
-    motor.stopMotor()
+    motor.stopMotor();
 }
 ```
 
 ### Encoder Access (Talon SRX, SRX Encoder)
+
+Define and create a _Talon SRX_ motor controller. Access an _SRX Magnetic Encoder_ connected to it. 
 
 ```java
 private static final int PPR = 4096;
@@ -141,6 +151,8 @@ public void teleopPeriodic() {
 
 ### Encoder Access (Spark Max, NEO Integrated Encoder)
 
+Define and create a _Spark Max_ motor controller. Access the _Integrated Encoder_ of the motor (_NEO_-series) it is connectd to. 
+
 ```java
 private static final double MOTOR_TO_MECHANISM_GEAR_RATIO = 8.0 / 1.0; // driver : driven
 
@@ -165,6 +177,8 @@ public void teleopPeriodic() {
 ```
 
 ### Encoder Access (Talon FX, Integrated Encoder)
+
+Define and create a _Talon FX_ motor controller. Access the _Integrated Encoder_ of the motor (_Falcon500_ / _Kraken_) it is connectd to. 
 
 ```java
 private static final double MOTOR_TO_MECHANISM_GEAR_RATIO = 8.0 / 1.0; // driver : driven
@@ -197,6 +211,8 @@ public void teleopPeriodic() {
 
 ### Encoder Access (CANCoder, Absolute)
 
+Define and create a _CAN Coder_ encoder. Access the _Absolute Position_ measurement from it.
+
 ```java
 private CANCoder encoder;
 private StatusSignal<Double> absPositionSignal;
@@ -223,6 +239,8 @@ public void teleopPeriodic() {
 
 ### Gyro Access (Pigeon 2, Yaw)
 
+Define and create a _Pigeon 2_ IMU. Access the _Yaw_ measurement from it.
+
 ```java
 private Pigeon2 pigeon;
 private StatusSignal<Double> yawSignal;
@@ -243,6 +261,8 @@ public void teleopPeriodic() {
 ```
 
 ### Subsystem, Single Motor (NEO 1.1, Spark Max, NEO Integrated Encoder)
+
+Implement a _Subsysem_ with a single _NEO 1.1_ motor and a _Spark Max_ operating it. Grant access to the integrated encoder.
 
 ```java
 public class SubsystemName extends SubsystemBase {
@@ -285,6 +305,8 @@ public class SubsystemName extends SubsystemBase {
 
 ### Command, Single Motor, Constant Speed, No Finish
 
+Implement a _Command_ operating a _Subsystem_ with a single motor at a speed defined via the constructor.
+
 ```java
 public class CommandName extends Command {
 
@@ -317,5 +339,34 @@ public class CommandName extends Command {
     public boolean isFinished() {
         return false;
     }
+}
+```
+
+### Basic Command Scheduling
+
+Create an instance of a _Subsystem_ and start a _Command_ in _teleop_.
+
+```java
+private SubsystemName subsystem;
+
+@Override
+public void robotInit() {
+    subsystem = new SubsystemName();
+}
+
+@Override
+public void teleopInit() {
+    Command command = new CommandName(subsystem);
+    command.schedule();
+}
+
+@Override
+public void teleopPeriodic() {
+
+}
+
+@Override
+public void teleopExit() {
+    
 }
 ```
