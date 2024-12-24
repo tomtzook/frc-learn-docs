@@ -114,7 +114,7 @@ public void teleopInit() {
 @Override
 public void teleopPeriodic() {
     double speed = -xbox.getRightY();
-    motor.set(0.5);
+    motor.set(speed);
 }
 
 @Override
