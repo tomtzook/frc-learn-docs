@@ -18,7 +18,7 @@ Name | Image | Manufacturer | Interface to RoboRIO | Supported Motors | Sensor P
 TalonSRX | ![talonsrx](https://github.com/user-attachments/assets/45fc5daa-1417-4049-ab0f-4923489d99c9) | CTRE | CANBus | Any Brushed Motor | Quadrature Encoder, Limit Swiches, Analog Sensor | _Phoenix5_ | `com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX`
 VictorSPX | ![victorspx](https://github.com/user-attachments/assets/c3ac7dfe-d861-44ea-b9d9-6017831332d9) | CTRE | CANBus | Any Brushed Motor | - | _Pheonix5_ | `com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX`
 TalonFX | ![talonfx + falcon500](https://github.com/user-attachments/assets/1dfcd907-9af3-4b16-8e6f-a483924640ec) | CTRE | CANBus | _Falcon500_/_Kraken_ (Integrated) | Integrated Encoder, Limit Switches | _Phoenix6_ | `com.ctre.phoenix6.hardware.TalonFX`
-SparkMax | ![sparkmax](https://github.com/user-attachments/assets/3ba2521e-372c-4dc0-a55b-1e0762d4e500) | REV | CANBus | Any Brushed Motor, _NEO_-Series Motors | Quadrature Encoder, Absolute Enoder, Limit Switches, Analog Sensor | _REVLib_ | `com.revrobotics.CANSparkMax`
+SparkMax | ![sparkmax](https://github.com/user-attachments/assets/3ba2521e-372c-4dc0-a55b-1e0762d4e500) | REV | CANBus | Any Brushed Motor, _NEO_-Series Motors | Quadrature Encoder, Absolute Enoder, Limit Switches, Analog Sensor | _REVLib_ | `com.revrobotics.spark.SparkMax`
 
 #### PercentVBus
 
