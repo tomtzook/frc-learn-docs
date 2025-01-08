@@ -77,48 +77,41 @@ The following are basic configurations available for the SparkMAX.
 
 #### Code Initialization and Basic Configuration
 
-We've already initialized and used the SparkMax in the past, it is a simple matter of creating new instance of `CANSparkMax`:
+To use a SparkMax we must first initialize a new instance of `SparkMax` class. It must be provided with the device's ID on the CANBus and type of motor connected to it:
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      // or CANSparkLowLevel.MotorType.kBrushless for brushed motor
-  }
-}
-```
-Note that you should pass `CANSparkLowLevel.MotorType` to the constructor instead of `CANSparkMaxLowLevel.MotorType` which was deprecated. 
-
-For here we can configure and operate the motor controller as we like. As mentioned before, we should start by resetting the settings to factory default:
-```java
-public class SomeSystem extends SubsystemBase {
-
-  private final CANSparkMax motor;
-
-  public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      motor.restoreFactoryDefaults();
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      // or SparkLowLevel.MotorType.kBrushless for brushed motor
   }
 }
 ```
 
-Only after restoring the settings should we start modifying the settings as wanted. Most settings should be set in the constructor when initializing the motor, so that the settings affect our operation of the motor throughout the robot code.
+From here, we can configure the motor to our specification. Configuration is done via a configuration object which contains all the possible settings for the device.
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      motor.restoreFactoryDefaults();
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
 
-      motor.setInverted(false); // or true to set as inverted
-      motor.setIdleMode(CANSparkBase.IdleMode.kCoast); // kBrake for brake mode 
+      SparkMaxConfig config = new SparkMaxConfig();
+
+      // modify configs to our needs
+
+      config.inverted(true); // true means direction of rotation will be inverted
+      config.idleMode(SparkBaseConfig.IdleMode.kCoast); // kBrake for brake mode 
+
+      // save the configuration on the device. 
+      motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
   }
 }
 ```
+We should not save configuration persistently, as it will affect motor controller operations after the code is replaced. Instead, the code will configure what it needs volatily everytime it starts. Note that configuring with a configuration object which was not modified is a kin to restoring settings to factory default.
 
 ### Built-In Sensors
 
@@ -153,11 +146,11 @@ The following code example uses this encoder:
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
       ...
       encoder = motor.getEncoder(); // access the integrated encoder interface
 
@@ -177,14 +170,20 @@ When working in _brushed mode_, we can connect an external encoder to this port 
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+
+      SparkMaxConfig config = new SparkMaxConfig();
       ...
       final int CPR = 4096;
-      encoder = motor.getEncoder(SparkRelativeEncoder.Type.kQuadrature, CPR);
+      config.encoder.countsPerRevolution(CPR);
+
+      ... // save config
+
+      encoder = motor.getEncoder();
 
       double position = encoder.getPosition(); // access the position measurement from the encoder. returns data in revolutions measured by the encoder.
       double velocity = encoder.getVelocity(); // access the velocity measurement from the encoder. returns data in RPM as measured by the encoder.
@@ -196,14 +195,20 @@ When working in brushless mode, we may connect an additional encoder (outside th
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      
+      SparkMaxConfig config = new SparkMaxConfig();
       ...
       final int CPR = 4096;
-      encoder = motor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, CPR);
+      config.alternateEncoder.countsPerRevolution(CPR);
+
+      ... // save config
+
+      encoder = motor.getAlternateEncoder();
 
       double position = encoder.getPosition(); // access the position measurement from the encoder. returns data in revolutions measured by the encoder.
       double velocity = encoder.getVelocity(); // access the velocity measurement from the encoder. returns data in RPM as measured by the encoder.
@@ -215,13 +220,27 @@ The data port also supports connections for absolute encoders using the _multi f
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final AbsoluteEncoder encoder;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+
+      SparkMaxConfig config = new SparkMaxConfig();
       ...
-      encoder = motor.getAbsoluteEncoder(SparkAbsoluteEncoder.Type.kDutyCycle);
+
+      final int START_PULSE_US = 1;
+      final int END_PULSE_US = 1024;
+      final double ZERO_OFFSET = 0.2;
+        
+      config.absoluteEncoder
+                .startPulseUs(START_PULSE_US)
+                .endPulseUs(END_PULSE_US)
+                .zeroOffset(ZERO_OFFSET);
+
+      ... // save config
+
+      encoder = motor.getAbsoluteEncoder();
 
       double position = encoder.getPosition(); // access the position measurement from the encoder. returns data in revolutions measured by the encoder. For absolute encoders, this value will be between 0 and 1 reflecting 0 to 360.
   }
@@ -242,17 +261,26 @@ Each of the swiches can be configured to operate in either _normally open_ or _n
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final SparkLimitSwitch fwdSwitch;
   private final SparkLimitSwitch rvsdSwitch;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      
+      SparkMaxConfig config = new SparkMaxConfig();
       ...
-      fwdSwitch = motor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-      fwdSwitch.enableLimitSwitch(true);
-      rvsdSwitch = motor.getReverseLimitSwitch(SparkLimitSwitch.Type.kNormallyOpen);
-      rvsdSwitch.enableLimitSwitch(true);
+
+      config.limitSwitch
+                .forwardLimitSwitchEnabled(true)
+                .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)
+                .reverseLimitSwitchEnabled(true)
+                .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen);
+
+      ... // save config
+
+      fwdSwitch = motor.getForwardLimitSwitch();
+      fwdSwitch = motor.getReverseLimitSwitch();
   }
 }
 ```
@@ -270,15 +298,21 @@ Just like hardware limits, software limits support limiting based on forward or 
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+
+      SparkMaxConfig config = new SparkMaxConfig();
       ...
-      motor.setSoftLimit(CANSparkBase.SoftLimitDirection.kForward, 40); // stop forward motion when encoder.getPosition reports 40 and above
-      motor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kForward, true);
-      motor.setSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, 0); // stop reverse motion when encoder.getPosition reports 0 and below
-      motor.enableSoftLimit(CANSparkBase.SoftLimitDirection.kReverse, true);
+
+      config.softLimit
+                .forwardSoftLimitEnabled(true)
+                .forwardSoftLimit(40)
+                .reverseSoftLimitEnabled(true)
+                .reverseSoftLimit(0);
+
+      ... // save config
   }
 }
 ```
@@ -319,30 +353,37 @@ The following code configures the PIDF loop and runs it for position mode using 
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
-  private final SparkPIDController pidController;
+  private final SparkClosedLoopController pidController;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
       ...
       encoder = motor.getEncoder();
-      pidController = motor.getPIDController();
+      pidController = motor.getClosedLoopController();
 
-      pidController.setP(0.01);
-      pidController.setI(0.0001);
-      pidController.setD(0);
-      pidController.setFF(0);
-      pidController.setIZone(2);
-      pidController.setIMaxAccum(5); // max I accumulation ceiling
-      pidController.setDFilter(0); // filter for D component output
-      pidController.setOutputRange(-1, 1); // maximum output range
-      pidController.setFeedbackDevice(encoder); // configure feedback device to use
+
+      SparkMaxConfig config = new SparkMaxConfig();
+      ...
+
+      config.closedLoop
+                .p(0.01)
+                .i(0.0001)
+                .d(0)
+                .velocityFF(0)
+                .iZone(2)
+                .iMaxAccum(5) // max I accumulation ceiling
+                .dFilter(0)  // filter for D component output
+                .outputRange(-1, 1) // maximum output range
+                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder); // configure feedback device to use (sensor)
+
+      ... // save config
   }
 
   public void moveToSetpoint(double setPoint) {
       // configure the wanted setpoint to start the PID loop
-      pidController.setReference(setPoint, CANSparkBase.ControlType.kPosition);
+      pidController.setReference(setPoint, SparkBase.ControlType.kPosition);
   }
 
   public boolean didReachSetPoint(double setPoint) {
@@ -400,7 +441,7 @@ You'll notice that the PID controller has several supported settings:
 - IMaxAccum: the maximum absolute value for the I accumulator variable.
 - DFilter: the maximum absolute value for the D output
 - OutputRange: maximum range of output values
-- FeedbackDevice: which feedback device to use for ProcessVariable. Should be a `RelativeEncoder` or `AbsoluteEncoder` instance.
+- FeedbackDevice: which feedback device to use for ProcessVariable. 
 
 > [!NOTE]
 > The setpoint value should match the measurement units of the feedback sensor. For position mode this is typically measured in motor revolutions.
@@ -413,46 +454,54 @@ Each SparkMax has actually 4 (0 -> 3) PIDF profiles (or slots). Each slot is an 
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
-  private final SparkPIDController pidController;
+  private final SparkClosedLoopController pidController;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
       ...
       encoder = motor.getEncoder();
-      pidController = motor.getPIDController();
+      pidController = motor.getClosedLoopController();
 
-      pidController.setFeedbackDevice(encoder);
+
+      SparkMaxConfig config = new SparkMaxConfig();
+      ...
+
+      config.feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder); 
 
       // configure slot 0
-      pidController.setP(0.01, 0);
-      pidController.setI(0.0001, 0);
-      pidController.setD(0, 0);
-      pidController.setFF(0, 0);
-      pidController.setIZone(2, 0);
-      pidController.setIMaxAccum(5, 0);
-      pidController.setDFilter(0, 0);
-      pidController.setOutputRange(-1, 1, 0);
+      config.closedLoop
+                .p(0.01, ClosedLoopSlot.kSlot0)
+                .i(0.0001, ClosedLoopSlot.kSlot0)
+                .d(0, ClosedLoopSlot.kSlot0)
+                .velocityFF(0, ClosedLoopSlot.kSlot0)
+                .iZone(2, ClosedLoopSlot.kSlot0)
+                .iMaxAccum(5, ClosedLoopSlot.kSlot0)
+                .dFilter(0, ClosedLoopSlot.kSlot0)
+                .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
 
       // configure slot 1
-      pidController.setP(0.5, 1);
-      pidController.setI(0, 1);
-      pidController.setD(0.02, 1);
-      pidController.setFF(0, 1);
-      pidController.setIZone(0, 1);
-      pidController.setIMaxAccum(0, 1);
-      pidController.setDFilter(0.3, 1);
-      pidController.setOutputRange(-1, 1, 1);
+      config.closedLoop
+                .p(0.5, ClosedLoopSlot.kSlot1)
+                .i(0, ClosedLoopSlot.kSlot1)
+                .d(0.02, ClosedLoopSlot.kSlot1)
+                .velocityFF(0, ClosedLoopSlot.kSlot1)
+                .iZone(0, ClosedLoopSlot.kSlot1)
+                .iMaxAccum(0, ClosedLoopSlot.kSlot1)
+                .dFilter(0.3, ClosedLoopSlot.kSlot1)
+                .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+
+      ... // save config
   }
   ...
   public void moveToSetpoint(double setPoint) {
       // configure the wanted setpoint to start the PID loop with slot 0
-      pidController.setReference(setPoint, CANSparkBase.ControlType.kPosition, 0);
+      pidController.setReference(setPoint, CANSparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
   public void rotateAtSpeed(double setPoint) {
       // configure the wanted setpoint to start the PID loop with slot 1
-      pidController.setReference(setPoint, CANSparkBase.ControlType.kVelocity, 1);
+      pidController.setReference(setPoint, CANSparkBase.ControlType.kVelocity, ClosedLoopSlot.kSlot1);
   }
 }
 ```
@@ -465,30 +514,34 @@ To handle this, the SparkMAX PIDF loop supports a wrap around mode, which allows
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax motor;
+  private final SparkMax motor;
   private final RelativeEncoder encoder;
-  private final SparkPIDController pidController;
+  private final SparkClosedLoopController pidController;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
       ...
       encoder = motor.getEncoder();
-      pidController = motor.getPIDController();
+      pidController = motor.getClosedLoopController();
 
-      pidController.setFeedbackDevice(encoder);
 
-      pidController.setPositionPIDWrappingMinInput(0);
-      pidController.setPositionPIDWrappingMaxInput(360);
-      pidController.setPositionPIDWrappingEnabled(true);
+      SparkMaxConfig config = new SparkMaxConfig();
+      ...
 
-      pidController.setP(0.01);
-      pidController.setI(0.0001);
-      pidController.setD(0);
-      pidController.setFF(0);
-      pidController.setIZone(2);
-      pidController.setIMaxAccum(5); 
-      pidController.setDFilter(0); 
-      pidController.setOutputRange(-1, 1);
+      config.closedLoop
+                .p(0.01)
+                .i(0.0001)
+                .d(0)
+                .velocityFF(0)
+                .iZone(2)
+                .iMaxAccum(5)
+                .dFilter(0)  
+                .outputRange(-1, 1) 
+                .feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder);
+                .positionWrappingInputRange(0, 1) // save measurement units as encoder
+                .positionWrappingEnabled(true);
+
+      ... // save config
   }
   ...
 }
@@ -509,15 +562,18 @@ The _Follower_ mode is quite unique and interesting. It allows a SparkMAX to mim
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax master;
-  private final CANSparkMax follower;
+  private final SparkMax master;
+  private final SparkMax follower;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      follower = new CANSparkMax(1, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      follower = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+
       ...
 
-      follower.follow(master);
+      SparkMaxConfig configFollower = new SparkMaxConfig();
+      configFollower.follow(master);
+      ... // save configFollower to follower
   }
 
   public void move(double speed) {
@@ -530,20 +586,23 @@ public class SomeSystem extends SubsystemBase {
 }
 ```
 
-If the follower motor moves in the wrong direction due to being placed the other way around, using `setInverted` with `follow` won't work, using `follow(master, true)` instead.
+If the follower motor moves in the wrong direction due to being placed the other way around, using `setInverted` with `follow` won't work, using `config.follow(master, true)` instead.
 
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax master;
-  private final CANSparkMax follower;
+  private final SparkMax master;
+  private final SparkMax follower;
 
   public SomeSystem() {
-      motor = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      follower = new CANSparkMax(1, CANSparkLowLevel.MotorType.kBrushless);
+      motor = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      follower = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+
       ...
 
-      follower.follow(master, true);
+      SparkMaxConfig configFollower = new SparkMaxConfig();
+      configFollower.follow(master, true);
+      ... // save configFollower to follower
   }
 
   public void move(double speed) {
@@ -560,47 +619,54 @@ This functions over all possible control modes that the _master_ may be using, w
 ```java
 public class SomeSystem extends SubsystemBase {
 
-  private final CANSparkMax master;
+  private final SparkMax master;
   private final RelativeEncoder encoder;
-  private final SparkPIDController pidController;
+  private final SparkClosedLoopController pidController;
 
-  private final CANSparkMax follower;
+  private final SparkMax follower;
 
   public SomeSystem() {
-      master = new CANSparkMax(0, CANSparkLowLevel.MotorType.kBrushless);
-      follower = new CANSparkMax(1, CANSparkLowLevel.MotorType.kBrushless);
-      ...
+      master = new SparkMax(0, SparkLowLevel.MotorType.kBrushless);
+      follower = new SparkMax(1, SparkLowLevel.MotorType.kBrushless);
+      
       encoder = master.getEncoder();
-      pidController = master.getPIDController();
+      pidController = master.getClosedLoopController();
+      
+      SparkMaxConfig config = new SparkMaxConfig();
 
-      pidController.setFeedbackDevice(encoder);
+      config.feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder); 
 
       // configure slot 0
-      pidController.setP(0.01, 0);
-      pidController.setI(0.0001, 0);
-      pidController.setD(0, 0);
-      pidController.setFF(0, 0);
-      pidController.setIZone(2, 0);
-      pidController.setIMaxAccum(5, 0);
-      pidController.setDFilter(0, 0);
-      pidController.setOutputRange(-1, 1, 0);
+      config.closedLoop
+                .p(0.01, ClosedLoopSlot.kSlot0)
+                .i(0.0001, ClosedLoopSlot.kSlot0)
+                .d(0, ClosedLoopSlot.kSlot0)
+                .velocityFF(0, ClosedLoopSlot.kSlot0)
+                .iZone(2, ClosedLoopSlot.kSlot0)
+                .iMaxAccum(5, ClosedLoopSlot.kSlot0)
+                .dFilter(0, ClosedLoopSlot.kSlot0)
+                .outputRange(-1, 1, ClosedLoopSlot.kSlot0)
 
       // configure slot 1
-      pidController.setP(0.5, 1);
-      pidController.setI(0, 1);
-      pidController.setD(0.02, 1);
-      pidController.setFF(0, 1);
-      pidController.setIZone(0, 1);
-      pidController.setIMaxAccum(0, 1);
-      pidController.setDFilter(0.3, 1);
-      pidController.setOutputRange(-1, 1, 1);
+      config.closedLoop
+                .p(0.5, ClosedLoopSlot.kSlot1)
+                .i(0, ClosedLoopSlot.kSlot1)
+                .d(0.02, ClosedLoopSlot.kSlot1)
+                .velocityFF(0, ClosedLoopSlot.kSlot1)
+                .iZone(0, ClosedLoopSlot.kSlot1)
+                .iMaxAccum(0, ClosedLoopSlot.kSlot1)
+                .dFilter(0.3, ClosedLoopSlot.kSlot1)
+                .outputRange(-1, 1, ClosedLoopSlot.kSlot1);
+      master.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
-      follower.follow(master);
+      SparkMaxConfig configFollower = new SparkMaxConfig();
+      configFollower.follow(master);
+      follower.configure(configFollower, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
   }
   
   public void moveToSetpoint(double setPoint) {
       // configure the wanted setpoint to start the PID loop with slot 0
-      pidController.setReference(setPoint, CANSparkBase.ControlType.kPosition, 0);
+      pidController.setReference(setPoint, CANSparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0);
   }
 ```
 
