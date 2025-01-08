@@ -32,12 +32,14 @@ public void teleopExit() {
 Define and create a _Spark Max_ motor controller. Run the motor at 50% (clockwise) during _teleop_.
 
 ```java
-private CANSparkMax motor;
+private SparkMax motor;
 
 @Override
 public void robotInit() {
-    motor = new CANSparkMax(RobotMap.MOTOR_IDENTIFIER, CANSparkLowLevel.MotorType.kBrushless);
-    motor.restoreFactoryDefaults(); // factory default
+    motor = new SparkMax(RobotMap.MOTOR_IDENTIFIER, SparkLowLevel.MotorType.kBrushless);
+    // factory default
+    SparkMaxConfig config = new SparkMaxConfig();
+    motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 }
 
 @Override
@@ -156,17 +158,21 @@ Define and create a _Spark Max_ motor controller. Access the _Integrated Encoder
 ```java
 private static final double MOTOR_TO_MECHANISM_GEAR_RATIO = 8.0 / 1.0; // driver : driven
 
-private CANSparkMax motor;
+private SparkMax motor;
 private RelativeEncoder encoder;
 
 @Override
 public void robotInit() {
-    motor = new CANSparkMax(RobotMap.MOTOR_IDENTIFIER, CANSparkLowLevel.MotorType.kBrushless);
-    motor.restoreFactoryDefaults(); // factory default
+    motor = new SparkMax(RobotMap.MOTOR_IDENTIFIER, SparkLowLevel.MotorType.kBrushless);
+    
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.encoder
+                .positionConversionFactor(1 / gearRatio)
+                .velocityConversionFactor(1 / gearRatio);
+
+    motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
     encoder = motor.getEncoder();
-    encoder.setPositionConversionFactor(1 / MOTOR_TO_MECHANISM_GEAR_RATIO);
-    encoder.setVelocityConversionFactor(1 / MOTOR_TO_MECHANISM_GEAR_RATIO);
 }
 
 @Override
@@ -267,16 +273,20 @@ Implement a _Subsysem_ with a single _NEO 1.1_ motor and a _Spark Max_ operating
 ```java
 public class SubsystemName extends SubsystemBase {
 
-    private final CANSparkMax motor;
+    private final SparkMax motor;
     private final RelativeEncoder encoder;
 
     public SubsystemName() {
-        motor = new CANSparkMax(RobotMap.MOTOR_ID, CANSparkLowLevel.MotorType.kBrushless);
-        motor.restoreFactoryDefaults(); // factory default
+        motor = new SparkMax(RobotMap.MOTOR_ID, SparkLowLevel.MotorType.kBrushless);
+    
+        SparkMaxConfig config = new SparkMaxConfig();
+        config.encoder
+                .positionConversionFactor(1 / gearRatio)
+                .velocityConversionFactor(1 / gearRatio);
+
+        motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
 
         encoder = motor.getEncoder();
-        encoder.setPositionConversionFactor(1 / RobotMap.MOTOR_TO_MECHANISM_GEAR_RATIO);
-        encoder.setVelocityConversionFactor(1 / RobotMap.MOTOR_TO_MECHANISM_GEAR_RATIO);
     }
 
     public double getPositionRotations() {
