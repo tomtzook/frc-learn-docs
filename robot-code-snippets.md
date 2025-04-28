@@ -92,6 +92,55 @@ public void teleopExit() {
 }
 ```
 
+### Motor Position Closed-Loop Control (Talon FX)
+
+Define and create a _Talon FX_ motor controller. Run the motor with position closed-loop during _teleop_.
+
+```java
+private TalonFX motor;
+private PositionDutyCycle positionControl;
+private NeutralOut neutralControl;
+
+@Override
+public void robotInit() {
+    motor = new TalonFX(RobotMap.MOTOR_IDENTIFIER);
+
+    TalonFXConfiguration configuration = new TalonFXConfiguration();
+    configuration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // not inverted
+    configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake; // not inverted
+    configuration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    configuration.Feedback.SensorToMechanismRatio = RobotMap.MOTOR_TO_SYSTEM_GEAR_RATIO;
+
+    // configure slot 0
+    configuration.Slot0.kP = 1;
+    configuration.Slot0.kI = 0.01;
+    configuration.Slot0.kD = 0;
+
+    motor.getConfigurator().apply(configuration);
+
+    positionControl = new PositionDutyCycle(0);
+    neutralControl = new NeutralOut();
+}
+
+@Override
+public void teleopInit() {
+    double targetPositionRotations = 2; // after gear box
+    positionControl.Position = targetPositionRotations;
+    // set positionControl.FeedForward to apply Arb FF
+    motor.setControl(positionControl)
+}
+
+@Override
+public void teleopPeriodic() {
+
+}
+
+@Override
+public void teleopExit() {
+    motor.setControl(neutralControl);
+}
+```
+
 ### Basic Controller Axis Use (Talon SRX, Xbox, Right Y)
 
 Define and create a _Talon SRX_ motor controller and an _XBOX_ controller. Run the motor during _teleop_ according to _Right Y_ axis of the gamepad.
