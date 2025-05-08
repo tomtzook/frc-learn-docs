@@ -192,8 +192,6 @@ We will see how these methods are used later.
 > For CTRE motors, it is requested above to create an `update` method. This should be a simple `public void` parameter-less method.
 > It will be called for all the modules from the swerve drive.
 
-> mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
-
 #### Module Control
 
 First, start by implementing a simple `stop` method to stop both Drive and Steer motors.
@@ -256,3 +254,6 @@ Now the Drive PID control is augmented with Feed Forward.
 #### Absolute Encoder
 
 ##### Zero Angles
+
+
+> mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
