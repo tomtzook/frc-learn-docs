@@ -56,11 +56,89 @@ we should take note of:
 
 ## Implementing
 
+We will divide our code into two distinct parts: the _Swerve module_ and the _Swerve drive_. The module will control each individual module, and the drive will be responsibly for the behaviour of the entire chassis. 
+
+The drive will be operated passing it a _motion vector_, from which it will control each individual module to meet the request in the vector.
+
+Control of the module is rather straight-forward: the swerve drive will request each module for a specific state (`SwerveModuleState` class), containing `velocity` for the Drive motor and `angle` for the Steer motor, and the module will have to do its best to maintain this state. This state will be calculated from the _motion vector_.
+
+The drive motor will be controlled using the _built-in velocity closed loop controller_, using the drive motor's _integrated relative encoder_. The state will contain a `velocity` measure in _meters per second_ which we will set to the PID controller and let it take care of maintaining this velocity.
+
+The steer motor will be controlled using the _built-in position closed loop controller_, using the steer motor's _integrated relative encoder_. The state will contain a `position` measure in _degrees_ which we will set to the PID controller and let it take care of maintaining.
+
 ### Swerve Module
 
+The first place to start our swerve code is with the basic modules. Because all the modules basically behave the same way, we will
+be creating a new class called `SwerveModule` to represent them all, and create 4 instances to use (1 for each module).
+
+Create the `SwerveModule` class (preferrably under `subsystems` package). In it, we will be defining the drive and steer motor controllers
+and any relevant properties.
+
+#### Module Initial Configuration
+
+Initialize and configure your motor controllers in the constructor. Make sure to configure both motors according to our needs
+- Drive motor should be in Brake mode, allowing our swerve to quickly stop and hold its ground while not moving.
+- Steer motor should be in Coast mode, we will be using PID to hold it in place.
+- Configure the Drive and Steer motors with inversion acoording to the assembly properties.
+- Configure the Drive motor for PID loop with the motor's integrated encoder, and the same for the Steer motor 
+  - For CTRE, use the `config.Feedback.FeedbackSensorSource = source` property, and set it to `config.FeedbackSensorSourceValue.RotorSensor`
+  - For REV, use the `config.closedLoop.feedbackSensor(sensor)` method, and set it to `config.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder`
+- Configure the encoder with conversion factors according to the gear ratios of Drive and Steer
+  - This will make it easier to query the encoder values, removing the need for constant conversions.
+  - We are not making a full conversion to the wheel, because it is linear data (as opposed to the rotational data of the motor) and is typically not represented well by the encoder API.
+  - For CTRE, use the `config.Feedback.SensorToMechanismRatio = gearRatio` property, and set it to the gear ratio (_driver / driven_)
+  - For REV, use the methods `config.encoder.positionConversionFactor(1 / gearRatio)` and `config.encoder.velocityConversionFactor(1 / gearRatio)`. Here it is `1 / gearRatio` (_driven / driver_ basically) because rev simply represents it differently than CTRE.
+- Configure the PID controllers of the motors to initial PID values. For now, just set `P` to `1` and the rest to `0`, we'll be calibrating later. Set the minimum and maximum output range to `-1` (min, 100% reverse) and `1` (max, 100% forward). 
+  - For CTRE, use `config.Slot0.kP = kP`, `config.Slot0.kI = kI` and `config.Slot0.kD = kD` properties (CTRE has no configurable IZone, it is automatic; min and max values are always `-1` and `1`)
+  - For REV, use `config.closedLoop.pidf(kP, kI, kD, kF)`, `config.closedLoop.iZone(izone)` and `config.closedLoop.outputRange(min, max)`
+- For the Steer motor, configure closed-loop position wrapping. This is necessary because the steer has a full rotation motion (0 -> 360), which is not natively supported in PID. Position-wrapping provides such support.
+  - For CTRE, set `config.ClosedLoopGeneral.ContinuousWrap = true`. 
+  - For REV, use `config.closedLoop.positionWrappingInputRange(0, 1)` (`0` = `0`; `1` = _full rotation_, `360`) and `config.closedLoop.positionWrappingEnabled(true)`.
+
+Once your are finished setting the configuration values, write them to the motor controllers to apply the changes.
+
+#### Module Sensors
+
+There are 2 sensors we care about: the integrated encoders of the motors. Each providing us of several points of information we need to use. For the Drive motor we will be using its position for odometery and velocity to track its state. For the Steer motor, we care about its position for optimizations, odometry and state tracking.
+
+As such, implement 5 methods:
+- `getHeadingDegrees`: returns the position of the steer encoder (in degrees). Heading refers to it indicating where the wheel is faced.
+- `getPositionMeters`: returns the position of the drive encoder (in meters).
+- `getVelocityMetersPerSecond`: returns the velocity of the drive encoder (in meters per second).
+- `getState`: return a `SwerveModuleState`. Create this class from the drive velocity and steer position (`new SwerveModuleState(velocity, heading)`).
+- `getPosition`: return a `SwerveModulePosition`. Create this class from the drive position and steer position (`new SwerveModuleState(position, heading)`).
+
+To implement each of those, you will need to access the encoders for the motors and perform some unit conversions.
+- For CTRE
+  - you will need to use the `StatusSignal` API to access the sensor information.
+  - The motor will export `getPosition` and `getVelocity` which return a `StatusSignal` each.
+  - Call these methods in the constructor and save the returned signal objects in members.
+  - Update these signals in an `update` method (create one). Call `BaseStatusSignal.refreshAll(drivePosition, driveVelocity)` to refresh the value of the signals from the sensor.
+  - Call `getValue` from a signal to receive its current value. This will return a wrapped value, you will need to export it to `double` and then convert the value to the wanted measurement unit.
+    - For velocity you will receive `AngularVelocity`, use `velocity.in(Units.RotationsPerSecond)` to get it in Rps and then convert the value to meters per second.
+    - For position you will receive `Angle`, use `position.in(Units.Rotations)` to get it in rotations and then convert the value to meters.
+    - Recall that we configured the device to give us encoder info **after** the gear-box, so no need to consider it here.
+- For REV   
+  - you will use the `RelativeEncoder` API.
+  - Retreive the `RelativeEncoder` instance in the constructor and save it into a member.
+  - Use `encoder.getPosition` to receive the position in rotations.
+  - Use `encoder.getVelocity` to receive the position in rotations per minute (RPM).
+  - Recall that we configured the device to give us encoder info **after** the gear-box, so no need to consider it here.
+
+We will see how these methods are used later. 
 
 > mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
 
-#### Zero Angles
+#### Module Control
+
+First, start by implementing a simple `stop` method to stop both Drive and Steer motors.
+
+The main control of the module is via `SwerveModuleState` provided from the swerve drive. As such, this is what we will implement here. Create a method called `set` which receive a `SwerveModuleState` parameter.
+
+#### Drive Feed Forward
+
+#### Absolute Encoder
+
+##### Zero Angles
 
 #### Optimizations
