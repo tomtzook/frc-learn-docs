@@ -74,6 +74,26 @@ be creating a new class called `SwerveModule` to represent them all, and create 
 Create the `SwerveModule` class (preferrably under `subsystems` package). In it, we will be defining the drive and steer motor controllers
 and any relevant properties.
 
+> [!NOTE]
+> `SwerveModule` is **not** a subsystem
+
+It is recommended to pass the constructor of the class the motor ids for drive and steer motors, since this class will be used multiple times for different modules with different motor ids.
+
+```java
+public class SwerveModule {
+
+  private final MotorControllerType driveMotor;
+  private final MotorControllerType steerMotor;
+
+  public SwerveModule(int driveMotorId, int steerMotorId) {
+    // this is just an illustration of how the code would look. The exact manner of initialization of the motor controller object
+    // is highly dependent on the specific motor controller type.
+    driveMotor = new MotorControllerType(driveMotorId);
+    steerMotor = new MotorControllerType(steerMotorId);
+  }
+}
+```
+
 #### Module Initial Configuration
 
 Initialize and configure your motor controllers in the constructor. Make sure to configure both motors according to our needs
@@ -96,6 +116,47 @@ Initialize and configure your motor controllers in the constructor. Make sure to
   - For REV, use `config.closedLoop.positionWrappingInputRange(0, 1)` (`0` = `0`; `1` = _full rotation_, `360`) and `config.closedLoop.positionWrappingEnabled(true)`.
 
 Once your are finished setting the configuration values, write them to the motor controllers to apply the changes.
+
+The general template of how it would look should be 
+```java
+public SwerveModule(int driveMotorId, int steerMotorId) {
+    driveMotor = new MotorControllerType(driveMotorId);
+    steerMotor = new MotorControllerType(steerMotorId);
+
+    // the real type depends on the motor, for TalonFX this would be TalonFXConfiguration, for example.
+    DriveMotorConfiguration driveConfig = new DriveMotorConfiguration();
+    // the fields and values here are very dependent on the motor controller type. This is just a general illustration of what settings to touch.
+    driveConfig.inverted = driveInverted;
+    driveConfig.idleMode = brakeMode;
+    driveConfig.feedbackSensor = motorSensor;
+    driveConfig.conversionFactor = gearRatio;
+    driveConfig.p = 1;
+    driveConfig.i = 0;
+    driveConfig.d = 0;
+    driveConfig.iZone = 0;
+    driveConfig.outputMin = -1;
+    driveConfig.outputMax = 1;
+    // how to apply configuration depends on the specific motor, for TalonFX this is done via the configurator, for example.
+    driveMotor.configure(driveConfig);
+
+    // the real type depends on the motor, for SparkMax this would be SparkMaxConfig, for example.
+    SteerMotorConfiguration steerConfig = new SteerMotorConfiguration();
+    // the fields and values here are very dependent on the motor controller type. This is just a general illustration of what settings to touch.
+    steerConfig.inverted = steerInverted;
+    steerConfig.idleMode = coastMode;
+    steerConfig.feedbackSensor = motorSensor;
+    steerConfig.conversionFactor = gearRatio;
+    steerConfig.p = 1;
+    steerConfig.i = 0;
+    steerConfig.d = 0;
+    steerConfig.iZone = 0;
+    steerConfig.outputMin = -1;
+    steerConfig.outputMax = 1;
+    steerConfig.positionWrapping = true;
+    // how to apply configuration depends on the specific motor, for SparkMax this is done via motor.configure, for example.
+    steerMotor.configure(steerConfig);
+}
+```
 
 #### Module Sensors
 
@@ -127,18 +188,71 @@ To implement each of those, you will need to access the encoders for the motors 
 
 We will see how these methods are used later. 
 
+> [!NOTE]
+> For CTRE motors, it is requested above to create an `update` method. This should be a simple `public void` parameter-less method.
+> It will be called for all the modules from the swerve drive.
+
 > mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
 
 #### Module Control
 
 First, start by implementing a simple `stop` method to stop both Drive and Steer motors.
+- To stop a CTRE motor, use the `NeutralOut` control type, and call `motor.setControl` with it.
+- To stop a REV motor, simply call `motor.stopMotor`.
 
-The main control of the module is via `SwerveModuleState` provided from the swerve drive. As such, this is what we will implement here. Create a method called `set` which receive a `SwerveModuleState` parameter.
+The main control of the module is via `SwerveModuleState` provided from the swerve drive. As such, this is what we will implement here. Create a method called `set` which receives a `SwerveModuleState` parameter and is `void`. In this method we will take the state data and set the motors.
+
+For the drive motor, we will use `state.speedMetersPerSecond` value. This will need to be converted to encoder measurement units. Recall that we set the motor ratio/conversion factors to include the gear ratio; As such, we do not need to consider the gear ratio, just the wheel. After conversion, set the motor to use a velocity PID loop with the calculated velocity. 
+- For CTRE use the `VelocityDutyCycle` control mode. Set its `Velocity` variable to the velocity and call `motor.setControl` with it.
+- For REV use the `SparkClosedLoopController` object from the motor, and call `setReference` with the velocity value and `kVelocity` control type. 
+
+For the steer motor, we will use `state.angle` value. This will need to be converted to encoder measurement units. Recall that we set the motor ratio/conversion factors to include the gear ratio; As such, we do not need to consider the gear ratio, just convert this angle to rotations. Do this with `state.angle.getRotations()`. After conversion, set the motor to use a position PID loop with the calculated position.
+- For CTRE use the `PositionDutyCycle` control mode. Set its `position` variable to the position and call `motor.setControl` with it.
+- For REV use the `SparkClosedLoopController` object from the motor, and call `setReference` with the position value and `kPosition` control type.
+
+This is the basic implementation of the control. We will need to improve it in the future, but this is a good start.
 
 #### Drive Feed Forward
+
+_Feed Forward_ is quite useful for velocity control loops, mostly because unlike proportional control (P in PID), feed-forward provide a constant output needed to maintain velocity. So we will add it to our control of the drive motor.
+
+First, declare a `SimpleMotorFeedforward` member in the class and initialize it in the constructor. It expects 3 values for its constructor
+- `ks`: static feed-forward output, always provides a constant output. Measured in `volts` (voltage).
+- `kv`: velocity feed-forward output, provides output based on the wanted velocity. Measured in `volts per meters per second`. 
+- `ka`: acceleration feed-forward output, provides output based on the wanted acceleration. Measured in `volts per meters per seconds squared`.
+
+`kv` can be calculated from `nominalMotorInputVolts / maxDriveSpeedMps`. That is, the optimal voltage for the motor (12 V for our motors) divided by the max speed that motor can acheive. The speed can be calculated from the motor specs
+```
+maxSpeed = motorFreeSpeedInRotations / gearRatio * wheelCircumference
+```
+
+The `freeSpeed` can actually be found in code, by using the `DCMotor` class. Retrieve the motor type in your module (e.g. `DCMotor.getNEO(1)` for _NEO 1.1_) and access the `freeSpeedRadPerSec` variable which provides the free speed in `rad/sec` (you will need to convert it to rotations).
+
+`ka` can be calculated from `nominalMotorInputVolts / (wheelGripCoefficientOfFriction * standardGravity)` which basically translates to `12 / (1.19 * 9.81)`
+- `wheelGripCoefficientOfFriction`: `1.19` is the typicall constant seen on the field with common FRC wheels
+- `standardGravity`: a physics constant indicating the acceleration Earth's gravity applies on a body. 
+
+The output of this feed foward type is calculated based on the input of _current velocity_ and _wanted velocity_. It provides a voltage
+output to give the motor to _maintain_ to acheive _wanted velocity_.
+
+In your `set` method, modify the control of the drive motor such that before setting the motor output you
+- call `feedForward.calculateWithVelocities(currentVelocity, wantedVelocity)`
+  - `currentVelocity` is the current velocity of the drive wheel (in meters per second). You can get it from `getVelocityMetersPerSecond`
+  - `wantedVelocity` is the wanted velocity of the drive wheel (in meters per second). You can get it from the state (`SwerveModuleState.speedMetersPerSecond`).
+- The output you will receive is in volts. Convert it to percent (`-1 -> 1`) by dividing by the battery voltage (from `RobotController.getBatteryVoltage()`)
+- Set this value to the motor output
+  - For CTRE, set the variable `FeedForward` in `VelocityDutyCycle`
+  - For REV, use a different overload of `setReference` method: `setReference(velocityRotations, SparkBase.ControlType.kVelocity, ClosedLoopSlot.kSlot0, feedForwardPercent, SparkClosedLoopController.ArbFFUnits.kPercentOut);`
+
+Now the Drive PID control is augmented with Feed Forward. 
+
+> [!WARNING]
+> Note that the feed foward will only update its value according to change when `set` is called.
+> If `set` is only called once, the feed forward value will be stuck as the same because no new value was passed to the motor controller.
+> This may cause issues with its behavior.
+
+#### Optimizations
 
 #### Absolute Encoder
 
 ##### Zero Angles
-
-#### Optimizations
