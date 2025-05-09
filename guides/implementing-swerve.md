@@ -337,8 +337,41 @@ You should also change `getHeadingDegrees` to use the absolute encoder instead o
 
 ##### Zero Angles
 
+The 0 position of the absolute encoder may not conincide with the 0 position we want for the wheels (forward). This is fine and expected as it depends on the model of the encoder and how it is mounted.
+
+To fix this, and make sure the values conincide, we need to find the _Zero Angles_. These are basically offsets from the absolute encoder zero. To find it
+- make sure to show the absolute encoder position on the dashboard
+- turn on the robot and rotate the wheel so that it is facing what should be 0
+  - it can be confusing to know which is the 0 position and which is the 180 position because the wheels look the same.
+  - to diffrentiate, rotate the drive motor forward/positive (you can use REV Hardware Client or Phoenix Client).
+  - Orient wheel so the forward is towards the foward of the chassis
+- The _zero angle_ is the value of the absolute encoder in that direction. Save it in a variable in `RobotMap`.
+- Each module will have a different one, so check for all of them
+
+Add a constructor parameter for the zero angle, since it is different for each module.
+
+Modify the absolute encoder configuration to use this offset.
+- For CANCoder, modify the `config.MagnetSensor.MagnetOffset` property to `-zeroAngle/360.0`
+
+Now make sure that the absolute encoder values are correct according to how we expect them to be.
+- Forward direction of the chassis should be 0
+- Left should be 90
+- Right should be 270
+- Backwards should be 180
+
 #### Tuning PID
+
+We must tune the PID controllers for the drive and steer to use them. Because all the modules are practically the same, we need only tune one of them and use the same values for the same.
+
+> [!NOTE]
+> For a real robot, it is recommended to use _REV Hardware Client_ and _Phoenix Tuner_ for tuning. However, you may tune via your code if you prefer.
+> For a simulated robot, you will have to tune via your code. Which will require adding some code to perform the tuning. Including displaying information
+> and changing the settings.
+
+The goal here is to make the drive motor to accurately reach the wanted velocity in the velocity loop, and for the steer to accurately reach the wanted heading. Bad tuning can be very problematic for the behaviour of the entire swerve. Bad tuning for drive may cause the swerve to be too slow or too fast, making it difficult to perform delicate motion. Bad tuning for steer will make the chassis move in the wrong direction, or cause "bumps" in motion.
+
+As such, using _Integral_ is not very recommended due to how slow its affect is, mostly for steer. The steer motor must reach the wanted position as fast as possible,
+and as accurately as possible. Rely mostly on the _proportional_ component.
  
 ### Swerve Drive
 
-> mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
