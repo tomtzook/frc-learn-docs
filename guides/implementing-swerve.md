@@ -54,6 +54,9 @@ we should take note of:
   - Integrated Steer Encoder
   - Absolute Steer Encoder   
 
+> [!NOTE]
+> Regarding coordinates, Steer degrees should follow counter-clockwise. That is, 90 degrees points to the left, 270 to the right.
+
 ## Implementing
 
 We will divide our code into two distinct parts: the _Swerve module_ and the _Swerve drive_. The module will control each individual module, and the drive will be responsibly for the behaviour of the entire chassis. 
@@ -98,11 +101,15 @@ public class SwerveModule {
 
 Initialize and configure your motor controllers in the constructor. Make sure to configure both motors according to our needs
 - Drive motor should be in Brake mode, allowing our swerve to quickly stop and hold its ground while not moving.
+  - For CTRE, use `config.MotorOutput.NeutralMode`
+  - For REV, use `config.idleMode`
 - Steer motor should be in Coast mode, we will be using PID to hold it in place.
 - Configure the Drive and Steer motors with inversion acoording to the assembly properties.
+  - For CTRE, use `config.MotorOutput.Inverted`
+  - For REV, use `config.inverted`
 - Configure the Drive motor for PID loop with the motor's integrated encoder, and the same for the Steer motor 
-  - For CTRE, use the `config.Feedback.FeedbackSensorSource = source` property, and set it to `config.FeedbackSensorSourceValue.RotorSensor`
-  - For REV, use the `config.closedLoop.feedbackSensor(sensor)` method, and set it to `config.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder`
+  - For CTRE, use the `config.Feedback.FeedbackSensorSource = source` property, and set it to `FeedbackSensorSourceValue.RotorSensor`
+  - For REV, use the `config.closedLoop.feedbackSensor(sensor)` method, and set it to `ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder`
 - Configure the encoder with conversion factors according to the gear ratios of Drive and Steer
   - This will make it easier to query the encoder values, removing the need for constant conversions.
   - We are not making a full conversion to the wheel, because it is linear data (as opposed to the rotational data of the motor) and is typically not represented well by the encoder API.
@@ -196,6 +203,9 @@ sensor data to a dashboard. This should be a simple `public void` parameter-less
 > is to receive a _name_ parameter in the constructor of the class and use it when writing to the dashboard to diffrentiate. The swerve
 > drive can provide that name for each module, so that it is unique for each (e.g. `"FrontRight"` for the front right module).
 > The use of the `name` should look like this `SmartDashboard.putNumber("SwerveModule_" + this.name + "_Heading", getHeadingDegrees())`.
+
+> [!NOTE]
+> Regarding coordinates, Steer degrees should follow counter-clockwise. That is, 90 degrees points to the left, 270 to the right.
 
 #### Module Control
 
@@ -293,6 +303,36 @@ public void set(SwerveModuleState state) {
 ```
 
 #### Absolute Encoder
+
+So far we've been using the motors' integrated relative encoder. However there is a problem here. Recall the relative encoders only measure
+rotation after power on, and as such do not know the actual position at power on. But the wheel may be oriented in any direction on power on.  This will require us to orient the wheels to the 0 position manually before each power on, which is quite cumbersome.
+
+Luckliy, most (if not all) swerve modules come with absolute encoders placed on the steer. This allows us to know the orientation of the wheel on power on and fix the relative encoder accordingly. Most modules use _CANCoder_.
+
+We still want to use the relative encoder so that we can use the inbuilt PID controller on the motor controller. But we can use the absolute encoder to adjust the relative encoder to recognize the real starting orientation.
+
+> [!NOTE]
+> If the steer motor is from CTRE (say _Falon 500_ with _Talon FX_) the motor controller can be configured to use the _CANCoder_ directly instead of its relative encoder.
+> In this guide we will assume that this is not possible and implement absolute encoder adjustments manually.
+
+Add the module's absolute encoder to the class, initialize and configure it in the constructor. You should receive the encoder ID/port in the constructor as parameter because it will be different for each module (each module has its own absolute encoder). For _CANCoder_ it is recommended to se the following configuration:
+- `config.MagnetSensor.MagnetOffset = 0`. We'll return to this in the next part
+- `config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1` makes the values of the encoder range from `0 -> 1`
+- `config.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;`. If the encoder is placed backwards, you can change this to adjust. Find out by moving the wheel and see how the encoder changes. It should go from `0 -> 1` when rotating counter-clockwise.
+
+Create method `setSteerPositionToAbsPosition`. In it, read the absolute encoder position, and set it into the steer relative encoder. Make sure to convert units properly. Recall also that the absolute encoder measures **after** gear box.
+- For _CANCoder_ absolute encoder, use the signal for position from `getPosition`. Make sure to also call `positionSignal.refresh()`.
+  - The reason we refresh in `setSteerPositionToAbsPosition` is to make sure we get the latest value, without needing to wait for `update` to be called.
+  - Remember to store the signal in a member instead of calling `getPosition` on each use.
+- For CTRE steer, call `motor.setPosition(newPosition)`.
+- For REV steer, call `steerEncoder.setPosition(newPosition)`.
+- Both CTRE and REV should receive the position in rotations **after** gear box, because we configured them to consider the gear box on their own.
+
+Call this new method in the end of the constructor, this is to update the relative encoder to our power on position. 
+
+Call this method at the start of the `set` method as well. This is done to correct any errors in the relative encoder measurement (which are possible).
+
+You should also change `getHeadingDegrees` to use the absolute encoder instead of the relative one. This is because the absolute encoder will provide us with the most accurate heading information. The relative is only needed for the inbuilt PID controller.
 
 ##### Zero Angles
 
