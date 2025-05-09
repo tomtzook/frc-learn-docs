@@ -375,3 +375,143 @@ and as accurately as possible. Rely mostly on the _proportional_ component.
  
 ### Swerve Drive
 
+With the module class ready, we can now use it to implement full swerve drive. Create a new class `SwerveDrive`. It should be a subsytem.
+
+#### Modules
+
+The modules are the core of the swerve control. There are 4, all instances of `SwerveModule`. 
+
+Add a new member to the subsytem - an array of modules (`SwerveModule[]`). Initialize it in the constructor to and array of size 4. Fill in all the array with instances of module. 
+
+The order here is important, we'll see later why
+- index 0: front left
+- index 1: back left
+- index 2: front right
+- index 3: back right
+
+The following is an illustration on how it should look
+```java
+public class SwerveDrive extends SubsystemBase {
+
+  private final SwerveModule[] modules;
+
+  public SwerveDrive() {
+    modules = new SwerveModule[4];
+    modules[0] = new SwerveModule(....); // front left
+    modules[1] = new SwerveModule(....); // back left
+    modules[2] = new SwerveModule(....); // front right
+    modules[3] = new SwerveModule(....); // back right
+  }
+}
+```
+
+#### Gyro/IMU
+
+The swerve requires a gyroscope or IMU to measure changes in YAW/heading of the entire drive. Most use _Pigeon 2_. Create a member for it, initialize and configure in the constructor.
+- It is likely that factory default is all that is needed for configuring the IMU
+- For _Pigeon 2_, supply the ID of the device to initialize, and use `Pigeon2Configuration` and the configurator to apply.
+
+Create a method `getHeading` which returns the Yaw angle from the device.
+- We'll use the `Rotation2d` class to represent rotation
+- If using _Pigeon_ you will need to use the yaw signal.
+  - Retrieve the signal from `pigeon.getYaw` in the constructor and store in a member.
+  - Refresh the signal in `periodic` (add if doesn't exist yet), with `BaseStatusSignal.refreshAll(yawSignal)`
+  - In `getHeading` retreive the value from the signal (with `getValue`)
+  - Create a new `Rotation2d` instance and give it the value returned from the signal
+  - Return the rotation object
+
+In `periodic`, show the value from `getHeading` on the dashboard. To get in degrees, you can do `rotation.getDegrees`.
+
+#### Information
+
+Let's start first with exporting information about the drive and modules before implementing control.
+
+Implement the following methods:
+- `getModuleStates`: returns an array of `SwerveModuleState` of states from all the modules.
+  - You can get the state of the module with `module.getState`.
+  - Create a `SwerveModuleState[]` at the start of the method, with size of `4` (because 4 modules)
+  - You can use a `for` loop over the modules to collect all the states and fill in the states array
+  - Return the states array when done
+- `getModulePositions`: returns an array of `SwerveModulePosition` of positions from all the modules.
+  - You can get the state of the module with `module.getPosition`.
+  - Create a `SwerveModulePosition[]` at the start of the method, with size of `4` (because 4 modules)
+  - You can use a `for` loop over the modules to collect all the states and fill in the positions array
+  - Return the positions array when done
+
+Implement `periodic` for the subsystem. In it, iterate over all the modules and call their update method `module.update`.
+- You can use a `for` loop over the modules.
+
+#### Control
+
+Implement `stop` method which stops all the modules.
+- Call the `module.stop` method for each module
+- You can use a `for` loop to iterate over the modules.
+
+Implement `setStates` method, which sets the states of all modules.
+- It will receive `SwerveModuleState[]` with states for all modules.
+- The state array will have states for the modules by the same order of the modules array (e.g. `states[0]` is for `modules[0]`, which is front left)
+- Iterate over all the modules and for each, give it its state via `module.set(state)`
+- You can use a `for` loop
+
+Add a kinemtics object to the system.
+- This will perform the calculations to operate the modules
+- It is of type `SwerveDriveKinematics`
+- Declare a member for it and initialize in the constructor
+- `SwerveDriveKinematics` exepcts 4 `Translation2d` objects which represent the positions of the modules
+  - It follows the same order of the modules array (front left, back left, front right, back right)
+- Each `Translation2d` can be constructed from an X, Y coordinates, indicating the position of the module relative to the center of the robot. Can be constructed as such `new Translation2d(X, Y)`.
+- The coordinates of each module can be calculated from the _width_ and _length_ of the chassis.
+- The X coordinates are along the length. The front modules will have a positive X, the rear ones will have negative X.  
+- The Y coordinates are along the width. The left modules will have a positive Y, the right ones will have negative Y.
+- The X coordinates will be half the length, in absolute value, since they are half the length from the center of the robot.
+- The Y coordinates will be half the width, in absolute value, since they are half the width from the center of the robot.
+
+All in all, constructing kinematics should look like
+```java
+public SwerveDrive() {
+  ...
+  kinematics = new SwerveDriveKinematics(
+    new Translation2d(length / 2, width / 2), // front left
+    new Translation2d(-length / 2, width / 2), // back left
+    new Translation2d(length / 2, -width / 2), // front right
+    new Translation2d(-length / 2, -width / 2) // back right
+  );
+  ...
+}
+```
+
+Implement `set` method, which will be our standard control method.
+- It will receive a `ChassisSpeeds` instance.
+  - This object contains
+    - `vxMetersPerSecond` speed along the X axis, forward or backwards, forward is positive
+    - `vyMetersPerSecond` speed along the Y axis, right or left, left is positive
+    - `omegaRadiansPerSecond` speed for rotation around the center of the robot, counter-clockwise is positive
+- Use the kinematics to convert this object into wanted module states
+  - call `kinematics.toSwerveModuleStates`
+  - this will return an array of `SwerveModuleState` to pass to the modules to acheive the wanted speeds
+- Call `SwerveDriveKinematics.desaturateWheelSpeeds` and pass it the array of states, and the maximum wanted speed of the robot
+  - this will normalize the speeds, in case they are too big for the drive
+  - the maximum speed can either be calculated via the drive motor characteristics, or be defined arbitrarily.
+  - you can start with a maximum speed of `5` _meters per second_ and increase it later. 
+- Pass the array to `setStates` to apply the states on the modules
+
+And that's it.
+
+#### Odometry
+
+To track the position of the swerve, we'll be adding odometry to our system. For swerve, odometry is calculated with `SwerveDriveOdometry`, which uses the gyro rotation and `SwerveModulePosition` from each module to track the position changes.
+
+Declare a member of `SwerveDriveOdometry` and initialize it in the constructor. It should be the last because it requires other members to initialize. It requires several parameters
+- The first is the kinematics
+- The second is the gyro rotation, which can be retrieved from `getHeading`
+- The third is an array of `SwerveModulePosition`, which can be retrieved from `getModulePositions`
+- The last is the starting position on the field, which will be position 0, which can be defined with `Pose2d.kZero`.
+
+Now we need to update the odometry object periodically. We'll do this in `periodic`, **after** updating the modules and gyro.
+Call `odometry.update`. It requires several parameters
+- The first is the gyro rotation, which can be retrieved from `getHeading`
+- The second is an array of `SwerveModulePosition`, which can be retrieved from `getModulePositions`
+
+You can display the position using the `Field2d` widget. The current position of the swerve can be retrieved with `odometery.getPoseMeters` **after** calling `update`.
+
+### Using the Drive
