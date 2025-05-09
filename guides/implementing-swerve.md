@@ -492,7 +492,8 @@ Implement `set` method, which will be our standard control method.
 - Call `SwerveDriveKinematics.desaturateWheelSpeeds` and pass it the array of states, and the maximum wanted speed of the robot
   - this will normalize the speeds, in case they are too big for the drive
   - the maximum speed can either be calculated via the drive motor characteristics, or be defined arbitrarily.
-  - you can start with a maximum speed of `5` _meters per second_ and increase it later. 
+  - you can start with a maximum speed of `5` _meters per second_ and increase it later.
+    - Put this value in a constant as it will be useful later. 
 - Pass the array to `setStates` to apply the states on the modules
 
 And that's it.
@@ -514,4 +515,74 @@ Call `odometry.update`. It requires several parameters
 
 You can display the position using the `Field2d` widget. The current position of the swerve can be retrieved with `odometery.getPoseMeters` **after** calling `update`.
 
+### Testing the Drive
+
+Add the subsytem into `Robot` class, and initialize it in `robotInit`. This will allow us to 
+use it, and view sensor data from the dashboard.
+
+For the modules to be tested, you must have first
+- Tuned PID for Drive and Steer for modules
+- Found _zero angle_ for all absolute encoders of the modules
+
+#### Module Sensor Testing
+
+Before we can run the modules, we must make sure the sensors are functioning as expected. Deploy your code and for each module
+- Rotate the drive wheel forward slowly and see that the module position changes in amounts correspanding to your movements
+- Do this backwards as well
+- Rotate again a bit faster and see the velocity value makes sense compared to your motion
+- Steer the wheel around to different positions and compare with the values of the absolute encoder and relative steer encoder
+  - both encoders should show the same values (with small divergances, less than 1%)
+  - both encoders should show the expected angles when the wheel is steer to a position
+    - recall the the orientation of the steer is counter-clockwise
+  - steer the wheel around several full rotations and check angles again.
+    - note that the relative encoder would normally accumulate several rotations while must absolute encoders do not, so compensate for that in your check
+
+For your drive
+- Rotate the entire chassis around and see that the gyro/IMU shows expected yaw values.
+
+#### Module Control Testing
+
+You should start by testing your drive without commands. 
+- Call `setStates` in `teleopInit`
+- Give it a an array of some states for the modules
+- Run it and see that the modules actually do what was requested
+  - Consult the sensor data on the dashboard to make sure
+  - But also perform visual inspection in case that sensor data is wrong due to a mistake
+  - Note that our modules have optimizations in them, which may cause the sensor values to be different than expected
+- Make sure to call `stop` in `teleopExit`
+- Try this with several different states to see that the modules all respond as expected.
+  - Some example states are
+    - `SwerveModuleState(1, 0)`
+    - `SwerveModuleState(1, 90)`
+    - `SwerveModuleState(1, 180)`
+    - `SwerveModuleState(1, 270)`
+    - `SwerveModuleState(-1, 0)`  
+- Do a similar check, but with `SwerveDrive.set` instead. Give several different combinations of `ChassisSpeeds`
+
+> [!NOTE]
+> If working on a physical robot, it is recommended that you put the chassis in the air for this testing.
+> Only after everything is working in the air, should you put it on the floor and run.
+
+If the modules do not respond as wanted, you should check
+- What is actually given to the motor controllers
+  - It is possible that unit made a mistake in unit conversion, or motor controller configuration
+  - You can add dashboard prints in `SwerveModule.set` on what values you give the motor controllers and then compare to what they should receive
+- Make sure all the definitions of the module properties and IDs are correct.
+- Make sure the order of modules in the array in `SwerveDrive` is as instructed
+- If the motors were requested the right values but do not acheive those, this is likely a PID/Feed-Forward tuning problem.
+
 ### Using the Drive
+
+With subsystem functionality checked, you can now implement commands that use it.
+
+Your first command should a drive command with a gamepad. Create such a command, in `execute`
+- query 3 axes from the gamepad (or several gamepads): one for forward/backward, one for left/right, one for rotation
+- Apply deadzone to the values to componsate for 0 position errors in the gamepad.
+  - This is especially wanted for swerve given how sensetive it is  
+- Convert the axes value from percent (-1 -> 1) to speeds.
+  - For X, Y values, multiply the values by the maximum drive speed defined earlier
+  - For rotation, define a new maximum rotation speed (it should be in `rad/sec`), and multiply the rotation axis value by it
+- Create a `ChassisSpeeds` from those values, and call `SwerveDrive.set`
+  - Note that in `ChassisSpeeds`, X refers to forward/backward, Y refers to right/left
+ 
+Test this command and play around with your swerve to see it moves as expected. 
