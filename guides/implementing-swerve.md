@@ -188,9 +188,14 @@ To implement each of those, you will need to access the encoders for the motors 
 
 We will see how these methods are used later. 
 
+If you didn't already, add an `update` method to the class. This method can be called from the swerve drive periodically. In it, print the
+sensor data to a dashboard. This should be a simple `public void` parameter-less method.
+
 > [!NOTE]
-> For CTRE motors, it is requested above to create an `update` method. This should be a simple `public void` parameter-less method.
-> It will be called for all the modules from the swerve drive.
+> Because we have 4 modules, we can't use the same name when writing to the dashboard for all modules. One way to handle it
+> is to receive a _name_ parameter in the constructor of the class and use it when writing to the dashboard to diffrentiate. The swerve
+> drive can provide that name for each module, so that it is unique for each (e.g. `"FrontRight"` for the front right module).
+> The use of the `name` should look like this `SmartDashboard.putNumber("SwerveModule_" + this.name + "_Heading", getHeadingDegrees())`.
 
 #### Module Control
 
@@ -212,12 +217,14 @@ This is the basic implementation of the control. We will need to improve it in t
 
 #### Drive Feed Forward
 
-_Feed Forward_ is quite useful for velocity control loops, mostly because unlike proportional control (P in PID), feed-forward provide a constant output needed to maintain velocity. So we will add it to our control of the drive motor.
+_Feed Forward_ is quite useful for velocity control loops, mostly because unlike proportional control (P in PID), feed-forward provide a constant output needed to maintain velocity. So we will add it to our control of the drive motor. W
 
 First, declare a `SimpleMotorFeedforward` member in the class and initialize it in the constructor. It expects 3 values for its constructor
 - `ks`: static feed-forward output, always provides a constant output. Measured in `volts` (voltage).
 - `kv`: velocity feed-forward output, provides output based on the wanted velocity. Measured in `volts per meters per second`. 
 - `ka`: acceleration feed-forward output, provides output based on the wanted acceleration. Measured in `volts per meters per seconds squared`.
+
+`ks` should be zero. We only to provide feed-forward based on the wanted velocity of the drive wheel.
 
 `kv` can be calculated from `nominalMotorInputVolts / maxDriveSpeedMps`. That is, the optimal voltage for the motor (12 V for our motors) divided by the max speed that motor can acheive. The speed can be calculated from the motor specs
 ```
@@ -231,7 +238,7 @@ The `freeSpeed` can actually be found in code, by using the `DCMotor` class. Ret
 - `standardGravity`: a physics constant indicating the acceleration Earth's gravity applies on a body. 
 
 The output of this feed foward type is calculated based on the input of _current velocity_ and _wanted velocity_. It provides a voltage
-output to give the motor to _maintain_ to acheive _wanted velocity_.
+output to give the motor to acheive _wanted velocity_.
 
 In your `set` method, modify the control of the drive motor such that before setting the motor output you
 - call `feedForward.calculateWithVelocities(currentVelocity, wantedVelocity)`
@@ -251,9 +258,46 @@ Now the Drive PID control is augmented with Feed Forward.
 
 #### Optimizations
 
+To improvide the behaviour of the modules, we can add a few optimizations to our code.
+
+First, consider the following situation: the swerve drive requests the module to drive forward at a certain speed, with state `(speed=1, angle=0)`. A few moments later, the drive requests the model to move backward at a certain speed, with state `(speed=1, angle=180)`. Per our current code, the steering while rotate the wheel 180 degrees to face the other direction. However, it is also possible to instead keep the steer at the same angle, but simply rotate the drive backward (reverse direction, `speed=-1`). This actually makes the module respond faster to the request, allowing the change of motion directions to be quick.
+
+To do this optimization we will use the builtin `optimize` method in `SwerveModuleState`. In your `set` method, before actually ordering the motors to do anything, call `state.optimize(getHeadingDegrees())`. This will modify `state` with this optimization. Afterwards the `state` may have been changed, depending on what it is and what are current steering is.
+
+Next, we want to optimize stopping. Consider: when the drive is controlled from a gamepad by a driver, there are some instances were the driver will release the joysticks to stop moving, essentially having them be close to 0. In such cases, the modules `set` method will be called with speeds close, or exactly zero. According to our current logic, the drive motor will attempt to maintain those speeds (if 0 than it will stay put). But steer is the more problematic part, as depending on the swerve drive logic, the steer angle requested in state may be any angle, depending on how exactly the joystick is resting on the gamepad. This may cause the module to continue moving in unexpected directions.
+
+To solve this, we can apply a _deadzone_ on the state, by checking if the speed requested is close to zero (say `state.speedMetersPerSecond < 0.001`). It it isn't, do the normal logic. But if it is, the drive motor should be stopped (brake mode will stop it immediatly and keep the wheel in place). The steer motor should be set to stay at the current angle (this will stop it from changing angles randomly, and keep the steering in place using the PID). 
+
+To make the steering stay in place, we will need to order it to use the same angle it was instructed to use _before_ (previous `set` call). To do that, we would need to always save the last _state_ requested from us, and then we can use its `angle` value.
+- Create a new member in the class `SwerveModuleState lastRequestedState`.
+- Set it to `new SwerveModuleState(0, Rotation2d.kZero)` in constructor
+- In `set` add an if for the _deadzone_ `if (Math.abs(state.speedMetersPerSecond) < 0.001)`.
+  - In the `if`, order the drive motor to stop moving and order the steer motor to use `lastRequestedState.angle`
+- Add an `else` afterwards
+  - In it, perform the normal operating logic from before
+  - Save the received `state` into `lastRequestedState`  
+
+The following is a pseudu code demonstrating how `set` would look with the optimizations
+```java
+public void set(SwerveModuleState state) {
+  state.optimize(getHeadingDegrees());
+  if (Math.abs(state.speedMetersPerSecond) < 0.001) {
+    stopDrive();
+    setSteer(lastRequestedState.angle);
+  } else {
+    setDrive(state.speedMetersPerSecond);
+    setSteer(state.angle);
+    lastRequestedState = state;
+  }
+}
+```
+
 #### Absolute Encoder
 
 ##### Zero Angles
 
+#### Tuning PID
+ 
+### Swerve Drive
 
 > mention about having to orient the wheel quickly or they will have a noticeble effect on the motion
