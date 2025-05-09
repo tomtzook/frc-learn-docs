@@ -332,7 +332,8 @@ Call this new method in the end of the constructor, this is to update the relati
 
 Call this method at the start of the `set` method as well. This is done to correct any errors in the relative encoder measurement (which are possible).
 
-You should also change `getHeadingDegrees` to use the absolute encoder instead of the relative one. This is because the absolute encoder will provide us with the most accurate heading information. The relative is only needed for the inbuilt PID controller.
+You should also change `getHeadingDegrees` to use the absolute encoder instead of the relative one. This is because the absolute encoder will provide us with the most accurate heading information. The relative is only needed for the inbuilt PID controller. 
+- If the encoder is _CANCoder_, for this to work well, update the position signal in `update` method alongside any other signals. 
 
 ##### Zero Angles
 
