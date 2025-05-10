@@ -58,6 +58,51 @@ public void teleopExit() {
 }
 ```
 
+
+### Motor Position Closed-Loop Control (Spark Max)
+
+Define and create a _Spark Max_ motor controller. Run the motor with position closed-loop during _teleop_.
+
+```java
+private SparkMax motor;
+private SparkClosedLoopController motorController;
+
+@Override
+public void robotInit() {
+    motor = new SparkMax(RobotMap.MOTOR_IDENTIFIER, SparkLowLevel.MotorType.kBrushless);
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.inverted(false);
+    config.idleMode(SparkBaseConfig.IdleMode.kBrake);
+    config.encoder
+            .positionConversionFactor(1 / RobotMap.MOTOR_TO_SYSTEM_GEAR_RATIO)
+            .velocityConversionFactor(1 / RobotMap.MOTOR_TO_SYSTEM_GEAR_RATIO);
+    config.closedLoop.feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+            .pidf(1, 0, 0, 0)
+            .iZone(0)
+            .outputRange(-1, 1);
+    motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+
+    motorController = motor.getClosedLoopController();
+}
+
+@Override
+public void teleopInit() {
+    double positionRotations = 2; // after gearbox
+    double feedForwardPecent = 0;
+    motorController.setReference(positionRotations, SparkBase.ControlType.kPosition, ClosedLoopSlot.kSlot0, feedForwardPercent, SparkClosedLoopController.ArbFFUnits.kPercentOut);
+}
+
+@Override
+public void teleopPeriodic() {
+
+}
+
+@Override
+public void teleopExit() {
+    motor.stopMotor();
+}
+```
+
 ### Motor Basic Control (Talon FX)
 
 Define and create a _Talon FX_ motor controller. Run the motor at 50% (clockwise) during _teleop_.
@@ -107,7 +152,7 @@ public void robotInit() {
 
     TalonFXConfiguration configuration = new TalonFXConfiguration();
     configuration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // not inverted
-    configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake; // not inverted
+    configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake; 
     configuration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
     configuration.Feedback.SensorToMechanismRatio = RobotMap.MOTOR_TO_SYSTEM_GEAR_RATIO;
 
@@ -124,10 +169,59 @@ public void robotInit() {
 
 @Override
 public void teleopInit() {
-    double targetPositionRotations = 2; // after gear box
+    double targetPositionRotations = 2; // 2 rotationa, after gear box
     positionControl.Position = targetPositionRotations;
-    // set positionControl.FeedForward to apply Arb FF
+    // set positionControl.FeedForward to apply Arb FF, in percent units
     motor.setControl(positionControl)
+}
+
+@Override
+public void teleopPeriodic() {
+
+}
+
+@Override
+public void teleopExit() {
+    motor.setControl(neutralControl);
+}
+```
+
+### Motor Velocity Closed-Loop Control (Talon FX)
+
+Define and create a _Talon FX_ motor controller. Run the motor with velocity closed-loop during _teleop_.
+
+```java
+private TalonFX motor;
+private VelocityDutyCycle velocityControl;
+private NeutralOut neutralControl;
+
+@Override
+public void robotInit() {
+    motor = new TalonFX(RobotMap.MOTOR_IDENTIFIER);
+
+    TalonFXConfiguration configuration = new TalonFXConfiguration();
+    configuration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // not inverted
+    configuration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    configuration.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    configuration.Feedback.SensorToMechanismRatio = RobotMap.MOTOR_TO_SYSTEM_GEAR_RATIO;
+
+    // configure slot 0
+    configuration.Slot0.kP = 1;
+    configuration.Slot0.kI = 0.01;
+    configuration.Slot0.kD = 0;
+
+    motor.getConfigurator().apply(configuration);
+
+    velocityControl = new VelocityDutyCycle(0);
+    neutralControl = new NeutralOut();
+}
+
+@Override
+public void teleopInit() {
+    double targetVelocityRotationsPerSecond = 20; // after gear box
+    velocityControl.Velocity = targetVelocityRotationsPerSecond;
+    // set velocityControl.FeedForward to apply Arb FF, in percent units
+    motor.setControl(velocityControl)
 }
 
 @Override
