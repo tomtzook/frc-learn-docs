@@ -353,8 +353,8 @@ public void robotInit() {
 public void teleopPeriodic() {
     BaseStatusSignal.refreshAll(positionSignal, velocitySignal); // only once per 20ms loop, typically in periodic
 
-    double mechanismRotations = positionSIgnal.getValueAsDouble();
-    double mechanismRotationsPerSecond = velocitySignal.getValueAsDouble();
+    double mechanismRotations = positionSignal.getValue().in(Units.Rotations);
+    double mechanismRotationsPerSecond = velocitySignal.getValue().in(Units.RotationsPerSecond);
 }
 ```
 
@@ -382,7 +382,7 @@ public void teleopPeriodic() {
     BaseStatusSignal.refreshAll(absPositionSignal); // only once per 20ms loop, typically in periodic
 
     // typically absolute encoders are placed on the shaft after a gearbox, so gearbox ratio handling isn't needed here.
-    double mechanismRotationAbs = absPositionSignal.getValueAsDouble(); // [0, 1] -> [0, 360]
+    double mechanismRotationAbs = absPositionSignal.getValue().in(Units.Rotations); // [0, 1] -> [0, 360]
 }
 ```
 
@@ -405,7 +405,7 @@ public void robotInit() {
 public void teleopPeriodic() {
     BaseStatusSignal.refreshAll(yawSignal); // only once per 20ms loop, typically in periodic
 
-    double yawDegrees = yawSignal.getValueAsDouble(); 
+    double yawDegrees = yawSignal.getValue().in(Units.Degrees); 
 }
 ```
 
