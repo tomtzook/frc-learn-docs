@@ -182,8 +182,7 @@ And now we get
 
 Because the index was changed to an invalid values, so the `if` caught it and printed that there is a _bad input_. Pretty cool what we can do here.
 
-### Example - Debug a Small Program
-
 ## Links
 
 - [Intellij - Debugging](https://www.jetbrains.com/help/idea/debugging-code.html)
+- [Debugging Java code in IntelliJ IDEA](https://www.youtube.com/watch?v=V5iQ1FyRtBo)
