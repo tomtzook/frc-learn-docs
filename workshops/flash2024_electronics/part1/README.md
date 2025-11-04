@@ -15,13 +15,13 @@ Although not understood at first, electricity is, at its core, electrons. These 
 In nature, balance is everything. One commonly known fact, seen in many movies, is that in space, if one opens an airlock that holds an atmosphere on one side and vacuum on the other, the air will rush out into the vacuum. This is because the air is compressed densely on one side, but on the other there is no air, and as such, things are unbalanced. To balance things out, the air rushes out into the vacuum. 
 The same is true for other particles. Say we have material that is positively charged, meaning its atoms lack electrons. and a material that is negatively charged, meaning its atoms have too many electrons, we create an imbalance. If we connect the two materials with a conductive material, the electrons will rush from the negative to the positive materials, seeking to balance the materials. They will stop when the material's charge is balanced. 
 
-![electrons in coductor](resources/electrons-in-coductor.png)
+<img width="512" height="144" alt="electrons in coductor" src="https://github.com/user-attachments/assets/de889133-7501-442b-967f-48ce68f914fe" />
 
 Batteries and other power sources do exactly that. You may notice that they are marked with “plus” and “minus” signs, corresponding to the positive and negative ends of the power source. As long as there is a charge imbalance, with a route between the positively and negatively charged materials and the connecting material allows electrons to flow through it, we will have a flow of electricity.
 
 With the ability to make electrons move around, we can force them to do things. If we place a lamp connected to the conductive material between “plus” and “minus” of the battery, the electrons will be forced to pass through said lamp. The lamp can use the electrons passing through as sources of energy to create light. 
 
-![basic circuit](resources/circuit-basic.png)
+<img width="421" height="276" alt="basic circuit" src="https://github.com/user-attachments/assets/913498f4-67d4-439d-b3e8-68c305371739" />
 
 These are the basics of electronic circuits. We can create many different circuits, and force electrons to do much: calculations, information storage, heat, light and so much more. All built around the principles we just discussed. Of course there is much more to electricity, but these are the basics.
 
@@ -42,11 +42,11 @@ There are several characteristics the define the behaviour of electricity in a c
 
 Most components of a circuit will have a certain resistance to them. When electrons flow through them, they will resist the flow. This causes a slow down of the current, and a loss of energy. This loss of energy is generally converted into heat, heating up the component and wires. Because of this loss of energy, the voltage of circuit than drops (as voltage is the measure of energy potential). We can calculate the voltage lost using _Ohm's law_: $voltage \ lost = {Resistance \ of \ component \over Current \ flowing \ through \ component}$.
 
-![circuit split](resources/circuit-split-noresistance.png)
+<img width="351" height="260" alt="circuit split" src="https://github.com/user-attachments/assets/de442c79-3c4d-4338-9b78-82ed235bc3d6" />
 
 Electricity will prefer the path of least resistance. Meaning, if there are several paths to take from positive to negative, current will mostly flow through the path where the resistance is lowest. Since this path will have less resistance, the current through it will be higher, compared to if it had to take the path with the lamp in the way.
 
-![circuit split with resistance](resources/circuit-split-resistance.png)
+<img width="416" height="255" alt="circuit split with resistance" src="https://github.com/user-attachments/assets/babcaf61-042a-4082-afe6-4d68286968ed" />
 
 In this example, we have two paths with lamps on each path. If the lamps are the same, and the resistance is the same, the current will actually split between the paths equally. If one lamp has higher resistance, the current will split not equally, with a higher current going through the path with least resistance.
 
@@ -58,7 +58,7 @@ The fact that electrons flow from the _negatively charged_ part of the power sup
 
 The control system is the set of components which are used to control and operate the robot systems. These include a few must-have components, and other components which connect to them and differ between specific robots. All the components are wired together for communication with each other and power supply.
 
-![Control System - REV](resources/frc-control-system-layout-rev.png)
+<img width="2592" height="1728" alt="Control System - REV" src="https://github.com/user-attachments/assets/914dedd6-4ee8-46c4-bae6-53d0b037817f" />
 
 ### Power Distribution
 
@@ -66,7 +66,7 @@ The power distribution component connects to the robot battery and supplies powe
 
 The PDH (Power Distribution Hub) is the REV-made version and is newer, while PDP (Power Distribution Panel) is the CTRE-made version. Both perform the same function, but they do have some differences, like the cable terminals on the PDH being easier to work with.
 
-![PDH](resources/power-distribution-hub.png)
+<img width="400" height="704" alt="PDH" src="https://github.com/user-attachments/assets/779c3872-5759-42e5-b0eb-3beddcd095e1" />
 
 The PDH is made up of two dozen power terminals for different components with different power supply:
 - 20 High Current (40A) terminals for motors
@@ -82,7 +82,7 @@ The board also has a CANBus connection to allow the robot to communicate with th
 
 The so-called brain of the robot, which provides processing and control over component functionality is the RoboRIO - a specially made Single Board Computer from National Instruments.
 
-![RoboRIO](resources/roborio.png)
+<img width="341" height="335" alt="RoboRIO" src="https://github.com/user-attachments/assets/b9e3b4ad-b97c-48bb-be6d-92673ef9c060" />
 
 It may be small, but it is a computer nonetheless. It contains most components one might find in a normal PC (like a central processor, volatile and non volatile memory and such) but with a few extra parts for its specific purpose. It is not exceptionally powerful either, but it is capable enough to do its intended job.
 
@@ -103,7 +103,7 @@ DC Motors comes in two forms: brushed and brushless. Brushed motors are easy to 
 
 Motors need electric power to work and thus are connected to the PDH/PDP for 12V 20A-40A (depending on the motor). However, because we need to control them, they are not connected directly to PDP/PDH, but rather via a motor controller. This controller allows the roboRIO to control the power and direction of the motor rotation.
 
-![NEO V1.1](resources/neo1_1.png)
+<img width="512" height="512" alt="NEO V1.1" src="https://github.com/user-attachments/assets/1d540fe6-25a1-417a-a846-2ce8fab416c7" />
 
 ### Motor Controllers
 
@@ -113,7 +113,7 @@ Generally, in FRC, one can deduce the capability of the motor controller by its 
 
 The type or amount of controllers is selected depending on the specific robot, as they should match the requirements of the robot itself. Some robots have dozens of motors and as such need a matching amount of motor controllers.
 
-![TalonSRX](resources/talonsrx.jpg)
+<img width="700" height="700" alt="TalonSRX" src="https://github.com/user-attachments/assets/90b44087-83d2-40d3-9ab4-cdc40fe5d2b6" />
 
 Each motor controller has 2 power inputs (GND, V+) and 2 power outputs (M-, M+) for brushed motors or 3 power outputs (A, B, C) for brushless. The inputs are connected to a PDH/PDP high power port (12V 40A/30A dependent on motor). The outputs connect to the motor.
 
@@ -140,7 +140,7 @@ Assume that one device controls the voltage over a wire, while a second device "
 This is the base to Voltage-Driven control, where the voltage level is encoded with specific data.
 This play with the voltage level is simple to perform. What actually occurs is that we change the energy of the electrons and this can easily be read. And because electrons are fast, the "reader" will see the changes almost instantly. This works fine for short distances.
 
-![Voltage Comm Basic Circuit](resources/voltage-based-comm-basic.png)
+<img width="512" height="214" alt="Voltage Comm Basic Circuit" src="https://github.com/user-attachments/assets/17fdb8e7-58d6-4d1b-911b-b0b526cebd89" />
 
 The above circuit illustrates sending digital data over a 3rd wire. As normal we have the "+" and "-" connections, which create a circuit over which voltage and current flow. You will see that they are marked as _VCC_ and _GND_. Generally, we can think of the as equivelent for "+" and "-" though this may not necessarily be the case. In reality the _VCC_ has the _higher voltage_ (say 5V) while the _GND_ has the _lower voltage_ (say 0V), but whether they are the "+" or "-" is circuit-dependent. Of course, when we connect them together, we get a flow of current as in any circuit. Now for the third wire, we can use it to create another circuit connecting the _VCC_ and _GND_ to each other and thus get voltage through it. On the controller device, we connect the _VCC_ to this wire via a switch. When the switch is open, the circuit is open and there is no voltage on the wire; when it is closed, the circuit is closed and the voltage will be the same as _VCC_. On the reading device, we connect this wire and the _GND_. This leads to a circuit from _VCC_ on the controlling device, through the third wire, and back to the _GND_. If we place a voltemeter on the reading device between the third wire and _GND_, we get a measure of voltage on the wire. So the device can now read this voltage and determine its value.
 This is not exactly accurate though, and there are many different circuit configurations, but it is the basic concept of the data transfer.
