@@ -1,0 +1,10 @@
+bin/
+build/
+
+.vs/
+.vscode/
+.idea/
+.gradle/
+
+imgui.ini
+simgui*
