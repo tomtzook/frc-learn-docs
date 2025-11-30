@@ -303,6 +303,22 @@ You can see by the names of the segments that the category is based on _time_. B
 
 #### Use
 
+The use of `new` indicates an Heap allocation. This means that all arrays and `Object`s are allocated on the heap. 
+
+Consider the following code:
+```java
+class Person {
+  int age;
+  double weight;
+}
+
+public static void main(String[] args) {
+    Person person = new Person();
+}
+```
+
+The creation of an instance of `Person` requests allocation of memory from the heap with a size based on the contents of the class. This does not include the code of the class, but just the data. In this case, the data size will be 12 bytes (`int` + `double`) with the addition of some metadata about the class (a minimum of 12 bytes) for a total of 24 bytes. 
+
 #### Garbage Collector
 
 ### Comparison
