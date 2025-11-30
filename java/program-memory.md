@@ -56,24 +56,24 @@ There are several important characteristics to understand about the stack and ho
 
 This can be rather confusing, so lets make a simple example to illustrate this.
 
-We start the program with the stack starting at address `0x2000` and ends at address `0x1000`. The stack pointer will start at `0x2000`.
+We start the program with the stack starting at address `2000` and ends at address `1000`. The stack pointer will start at `2000`.
 
-<img width="276" height="289" alt="image" src="https://github.com/user-attachments/assets/0afbe3ea-e9d2-4b66-9213-85ada24d0369" />
+<img width="247" height="162" alt="image" src="https://github.com/user-attachments/assets/360824f0-b111-4074-b504-f1def5c0bd00" />
 
-Now we start by writing data into the next stack position by doing `push 5`, which writes 4 bytes of information with the value `5` (`000000000101`) into the current stack pointer (address `0x2000`). 
-The information is written on bytes at addresses `0x2000`, `0x1999`, `0x1998`, `0x1997`. The new stack pointer will be at position `0x1996`.
+Now we start by writing data into the next stack position by doing `push 5`, which writes 4 bytes of information with the value `5` (`000000000101`) into the current stack pointer (address `2000`). 
+The information is written on bytes at addresses `2000`, `1999`, `1998`, `1997`. The new stack pointer will be at position `1996`.
 
-<img width="266" height="275" alt="image" src="https://github.com/user-attachments/assets/48a6222e-7134-47ef-b240-ebbf1ca810f6" />
+<img width="266" height="154" alt="image" src="https://github.com/user-attachments/assets/e3743270-0008-4deb-bb9e-819a38ad8608" />
 
-Next, let's write another 4 bytes of information with `push 10`, which writes 4 bytes of information with the value `5` into the current stack pointer (address `0x1996`).
-The information is written on bytes at addresses `0x1996`, `0x1995`, `0x1994`, `0x1993`. The new stack pointer will be at position `0x1992`.
+Next, let's write another 4 bytes of information with `push 10`, which writes 4 bytes of information with the value `5` into the current stack pointer (address `1996`).
+The information is written on bytes at addresses `1996`, `1995`, `1994`, `1993`. The new stack pointer will be at position `1992`.
 
-<img width="296" height="280" alt="image" src="https://github.com/user-attachments/assets/4ce38265-2967-4e2d-9f71-07f74f5e48f9" />
+<img width="268" height="151" alt="image" src="https://github.com/user-attachments/assets/70c8a21e-891e-4f42-9465-f92fd74eca64" />
 
-We have stored a total of 8 bytes on the stack so far, divided into 2 different values. We can actually read both of them by just accessing their bytes directly and reading the values (bytes `0x2000`, `0x1999`, `0x1998`, `0x1997` for value `5`).
-When a value is no longer of use in the stack, we would pop it off the stack (basically deleting it) with `pop`. The stack pointer after this will be moved back to `0x1996`, since we popped 4 bytes of information out, essentially returning to the previous state.
+We have stored a total of 8 bytes on the stack so far, divided into 2 different values. We can actually read both of them by just accessing their bytes directly and reading the values (bytes `2000`, `1999`, `1998`, `1997` for value `5`).
+When a value is no longer of use in the stack, we would pop it off the stack (basically deleting it) with `pop`. The stack pointer after this will be moved back to `1996`, since we popped 4 bytes of information out, essentially returning to the previous state.
 
-<img width="266" height="275" alt="image" src="https://github.com/user-attachments/assets/48a6222e-7134-47ef-b240-ebbf1ca810f6" />
+<img width="266" height="154" alt="image" src="https://github.com/user-attachments/assets/e3743270-0008-4deb-bb9e-819a38ad8608" />
 
 > [!NOTE]
 > In reality, poping doesn't completely delete the information. For one, when poping the popped value will be placed in a CPU register (a small temporary storage space).
@@ -129,11 +129,12 @@ We start with some stack with the stack pointer at position `0x2000`, and start 
 This will place the following on the stack
 - first parameter, `num1`, value given is `55` in 4 bytes, _bytecode_: `bipush 55` (conditional)
 - second parameter, `num2`, value given is `21` in 4 bytes, _bytecode_: `bipush 21` (conditional)
+- space for placing the return value from the function, 4 bytes, not seen in the code.
 - the intended return address from `add`, which is to line `7` in the bytecode (done as part of `invokestatic`).
 
-The final stack pointer will be `0x2000 - (2 * 4) - 8` (2 * `int` + 1 `address`).
+The final stack pointer will be `0x2000 - (3 * 4) - 8` (3 * `int` + 1 `address`).
 
-<img width="272" height="153" alt="image" src="https://github.com/user-attachments/assets/b163936d-2e00-47a1-8ae8-13ec63ab7694" />
+<img width="271" height="147" alt="image" src="https://github.com/user-attachments/assets/101b3ae3-4f45-4848-8bdb-bba99602ec49" />
 
 Then when the code in the function will read the parameters from the stack (by calculating what the address will be), add them together, save the result and return to the stored address.
 This is not entirely clear from the byte code, because it is byte-code, so let's show it differently in an assembly code
