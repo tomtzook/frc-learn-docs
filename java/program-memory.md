@@ -207,6 +207,7 @@ Line 6: we return the stack pointer to its original position before our code.
 > [!NOTE]
 > The example above is written in _NASM_ with _x86_ architecture and the intel syntax.
 > The code also removes use of registers for parameter passing and returning to demonstrate stack-only use.
+> The code also does not align stack access, which is typically necessary.
 
 You can see that we finished with the stack returning to its original state. This is exactly as intended, as the stack is meant to provide a _temporary_ space for data. The next call to a function in `main` will lead to a similar process, only differeing because the process is different. 
 
@@ -318,6 +319,10 @@ public static void main(String[] args) {
 ```
 
 The creation of an instance of `Person` requests allocation of memory from the heap with a size based on the contents of the class. This does not include the code of the class, but just the data. In this case, the data size will be 12 bytes (`int` + `double`) with the addition of some metadata about the class (a minimum of 12 bytes) for a total of 24 bytes. 
+
+<img width="143" height="365" alt="image" src="https://github.com/user-attachments/assets/88f623ae-5cbd-4cde-8e01-01ea723a64ed" />
+
+The access to specific variables in the class, is about accessing specific subsets of memory within the allocation.
 
 #### Garbage Collector
 
