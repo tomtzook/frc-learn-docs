@@ -27,7 +27,7 @@ go over how this is done in _Java_.
 Programs on an operating system will typically receive a contiguous (_virtual_) memory space to store all its stuff. This includes both code and data
 which are split into two distinct areas on purpose.
 
-
+**FINISH**
 
 ## Data Memory
 
@@ -142,32 +142,149 @@ This is not entirely clear from the byte code, because it is byte-code, so let's
 main:
   ... # the code before
 
-  sub rsp, 12                      # clear space for the 2 parameters + return value
-  mov dword [rsp + 8], 55          # put 55 at the first parameter location
-  mov dword [rsp + 4], 21          # put 21 at the second parameter location
-  call func                        # calls the function, will place the return address on the stack
-  mov rax, dword [rsp]             # function will return to here, read the return value from the stack
-  add rsp, 12                      # restore the stack pointer to before the call
+1   sub rsp, 12                      # clear space for the 2 parameters + return value
+2   mov dword [rsp + 8], 55          # put 55 at the first parameter location
+3   mov dword [rsp + 4], 21          # put 21 at the second parameter location
+4   call func                        # calls the function, will place the return address on the stack
+5   mov rax, dword [rsp]             # function will return to here, read the return value from the stack
+6   add rsp, 12                      # restore the stack pointer to before the call
 
   ... # the code after
 
 func:
-  mov rax, dword [rsp + 8 + 4 + 4] # read the first parameter into rax.
-                                   # Need to skip the return address, the second parameter and the return value location
+7   mov rax, dword [rsp + 8 + 4 + 4] # read the first parameter into rax.
+                                     # Need to skip the return address, the second parameter and the return value location
 
-  mov rcx, dword [rsp + 8 + 4]     # read the first parameter into rcx.
-                                   # Need to skip the return address and the return value location
+8   mov rcx, dword [rsp + 8 + 4]     # read the first parameter into rcx.
+                                     # Need to skip the return address and the return value location
 
-  add rax, rcx                     # add rax and rcx. result will be in rax
+9   add rax, rcx                     # add rax and rcx. result will be in rax
 
-  mov dword [rsp + 8], rax         # write the result from rax into the location on stack for the return value
-  ret                              # return to the return address on stack (location rsp)
+10  mov dword [rsp + 8], rax         # write the result from rax into the location on stack for the return value
+11  ret                              # return to the return address on stack (location rsp)
 ```
+
+This may look complex, but that's just assembly being assembly. Let's go over it line by line with the stack.
+
+We start at line 1, with the stack being at its initial state for us.
+
+<img width="254" height="157" alt="image" src="https://github.com/user-attachments/assets/b9df2f94-baf1-4480-90df-19290b955921" />
+
+Line 1: This line just moves the stack pointer 12 bytes
+
+<img width="245" height="159" alt="image" src="https://github.com/user-attachments/assets/c3c1344a-2bba-4b9f-b290-5d685a783c82" />
+
+Line 2: Here we put 55 into the stack at bytes `0x1ffc`-`0x1fff`
+
+<img width="272" height="158" alt="image" src="https://github.com/user-attachments/assets/ed95d8f6-98e3-4c68-8305-b7d933be96ee" />
+
+Line 3: Here we put 21 into the stack at bytes `0x1ff8`-`0x1ffb`
+
+<img width="272" height="169" alt="image" src="https://github.com/user-attachments/assets/508841a1-ab54-44ac-94ca-304f982d003c" />
+
+Line 4: we call the function `func`. This will push the return address (line 5) into the stack. We also move to line 7 to start the function code.
+
+<img width="280" height="167" alt="image" src="https://github.com/user-attachments/assets/3d9573d7-f103-4618-ad41-01fa8c94d954" />
+
+Line 7: here we start the function by reading the first parameter into register `rax` (from address `0xffc`). This does not modify the stack
+Line 8: we read the second parameter into register `rcx` (from address `0xff8`). This does not modify the stack.
+Line 9: we perform the add instruction between `rax` and `rcx` with the result being placed in `rax`. This does not modify the stack.
+Line 10: we place the result from `rax` into the stack (address `0x1ff4`)
+
+<img width="280" height="176" alt="image" src="https://github.com/user-attachments/assets/7c37530b-d344-4425-92bf-61433d71c743" />
+
+Line 11: we return from the function. This pops the return address from the stack and moves to it (line 5)
+
+<img width="286" height="182" alt="image" src="https://github.com/user-attachments/assets/7caf3a4b-c616-42d2-9ab7-6b449650fc3d" />
+
+Line 5: we read the result from the stack, indicated by the stack pointer (address `0x1ff4`). This does not modify the stack.
+Line 6: we return the stack pointer to its original position before our code.
+
+<img width="254" height="157" alt="image" src="https://github.com/user-attachments/assets/b9df2f94-baf1-4480-90df-19290b955921" />
 
 > [!NOTE]
 > The example above is written in _NASM_ with _x86_ architecture and the intel syntax.
 > The code also removes use of registers for parameter passing and returning to demonstrate stack-only use.
 
+You can see that we finished with the stack returning to its original state. This is exactly as intended, as the stack is meant to provide a _temporary_ space for data. The next call to a function in `main` will lead to a similar process, only differeing because the process is different. 
+
+All these stack manipulations are done automatically by the compiler, we don't actually have to handle it ourselves. This makes the stack very comfortable and safe to use.
+
+You might also have noticed that the caller (`main`) and callee (`func`) have to coordinate where each thing should be placed (which addresses, in what order and so on). If `func` looked for the first parameter _after_ the second, then it would have the wrong value. This coordination is called _Application Binary Interface_ (_ABI_) and ensures that the way the code compiles is consistent in such a way that functions can work with each other.
+
+> [!NOTE]
+> If you ever heared the term _stack overflow_ or _stack overrun_, this usually refers to an issue where
+> the program has reached the end of the stack. I.e. it has no more space in the stack and cannot continue.
+> It could also refer to situations where code access the wrong locations on the stack.
+
+For another example, I've set up a program with a debugger to show how the stack is managed for us
+```java
+public class Main {
+    public static void main(String[] args) {
+        int a = 55;
+        int b = 21;
+
+        int result = add(55, 21);
+        System.out.println(result);
+    }
+
+    static int add(int num1, int num2) {
+        int value1 = 4;
+        value1 *= num1;
+
+        if (value1 > num2) {
+            int value2 = 5;
+            value2 += num2;
+            value1 -= value2;
+        }
+
+        return value1;
+    }
+}
+```
+
+<img width="419" height="488" alt="image" src="https://github.com/user-attachments/assets/45425598-629d-4d38-a101-2b08ef7122ce" />
+
+Take a look at the list of variables below. These are the _local variables_, stored on the stack. We are now going to enter a new function. Notice what happens to these variables.
+
+<img width="404" height="334" alt="image" src="https://github.com/user-attachments/assets/38b933b3-f988-439e-b0e2-5a1de3c5aa7f" />
+
+Now we are shown different variables. This is because when we entered the new function, the debugger is showing us only the local variables of the current function call. So this new function starts with the parameters as variables. Let's move on.
+
+<img width="390" height="335" alt="image" src="https://github.com/user-attachments/assets/584b97f7-5987-4fb9-b9b2-e58bb866a886" />
+
+Now we have a new local variable, because it was just added to the stack. The stack code generated by the compiler freed extra space for it and set a value. Kinda like we did in our assembly code.
+
+<img width="387" height="431" alt="image" src="https://github.com/user-attachments/assets/31fa8f07-b610-44fc-a92f-a573ab697b6e" />
+
+As we enter the `if` we now get a new variable created on the stack, as the code wants.
+
+<img width="386" height="453" alt="image" src="https://github.com/user-attachments/assets/4fa4375b-2b91-4912-8c88-fea8ef6f80bf" />
+
+And when we exit this `if`, the variable is removed, because it is no longer used (out of scope) and the stack code just removes it for us. When we return from the function, the same will happen to the rest of the variables.
+
+<img width="417" height="541" alt="image" src="https://github.com/user-attachments/assets/78f2c0c4-e4ac-44de-b793-4d78094c28b8" />
+
+Basically, we don't need to manage the memory operations, the compiler will generate appropriate stack code to handle it for us. 
+
+We can also see the _call stack_ from the debugger. Which originates from the stack itself, this is just parsed and named for human readibility.
+
+<img width="315" height="280" alt="image" src="https://github.com/user-attachments/assets/f8472075-738b-47c7-b204-62f1f53d4578" />
+
+#### Summary
+
+We have seen a bit on how the stack operates and is used. It can be complicated behind the scenes, but because the compiler takes care of this for us, we do not have to work hard.
+
+Basically, all local variables, and function calls rely on stack use. These are placed and removed from the stack as needed, with the stack pointer going back and forth consistently.
+
 ### Heap Memory
+
+### Comparison
+
+| Aspect | Stack | Heap |
+|--------|-------|------|
+| Runtime Cost | Low, fast to operate and use | High, allocation of data is costly |
+| Coding cost | Low, code is generated by the compiler | Medium, programmer must explicitly use |
+| Management | Simple, generated code takes care of allocation and freeing | Complex, programmer or JVM must take care of allocation, freeing and proper referencing |
 
 ## Code Memory
