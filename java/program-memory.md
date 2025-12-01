@@ -400,6 +400,34 @@ You may have noticed that you never do something like `delete` in _Java_. This i
 
 As mentioned previously, variables which hold the addresses to heap allocations are called _references_. Each variable doing so would be considered as one additional _reference_ to the memory. When there are no such variables then there are 0 references and the _GC_ can release the allocation.
 
+##### Demonstration
+
+Take a look at this simple program
+```java
+public class Main {
+
+    public static class Person {
+        int age;
+        double weight;
+    }
+
+    public static class Student extends Person {
+        double avgGrade;
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Person person = new Person();
+        Person person2 = person;
+
+        Student student = new Student();
+    }
+}
+```
+
+Let's us draw out how all the allocations we made look like
+
+<img width="555" height="626" alt="image" src="https://github.com/user-attachments/assets/abd8f408-6665-4072-996c-7f49eeb49792" />
+
 ### Comparison
 
 | Aspect | Stack | Heap |
