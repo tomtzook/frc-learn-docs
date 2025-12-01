@@ -166,6 +166,11 @@ func:
 11  ret                              # return to the return address on stack (location rsp)
 ```
 
+> [!NOTE]
+> The example above is written in _NASM_ with _x86_ architecture and the intel syntax.
+> The code also removes use of registers for parameter passing and returning to demonstrate stack-only use.
+> The code also does not align stack access, which is typically necessary.
+
 This may look complex, but that's just assembly being assembly. Let's go over it line by line with the stack.
 
 We start at line 1, with the stack being at its initial state for us.
@@ -206,11 +211,6 @@ Line 5: we read the result from the stack, indicated by the stack pointer (addre
 Line 6: we return the stack pointer to its original position before our code.
 
 <img width="254" height="157" alt="image" src="https://github.com/user-attachments/assets/b9df2f94-baf1-4480-90df-19290b955921" />
-
-> [!NOTE]
-> The example above is written in _NASM_ with _x86_ architecture and the intel syntax.
-> The code also removes use of registers for parameter passing and returning to demonstrate stack-only use.
-> The code also does not align stack access, which is typically necessary.
 
 You can see that we finished with the stack returning to its original state. This is exactly as intended, as the stack is meant to provide a _temporary_ space for data. The next call to a function in `main` will lead to a similar process, only differeing because the process is different. 
 
@@ -353,7 +353,52 @@ Because _person_ points to an heap allocation, leaving the `main` function does 
 
 #### Garbage Collector
 
-**TODO**
+You might have noticed that we didn't talk about _freeing_ heap allocations. On lower level languages, like _C++_, heap allocations must be freed manually (by calling using the `delete` operator in _C++_). But because this must be done by the user, it can be quite easy to forget to do so. Consider the example below:
+```c++
+int* doSomething() {
+  int* data = new int; // allocate an int on the heap
+
+  // do some stuff ....
+
+  if (error != 0) {
+    // if we've encountered an error, return a null
+    return nullptr;
+  }
+
+  // return the allocated int
+  return data;
+}
+```
+
+This fictional function allocates an `int` on the heap, does some stuff and returns a reference (actually a pointer, but basically the address of where it is on the heap) to it. Because the function returns this reference, the user which calls this function must handle releasing it when done, which makes it out-of-scope for the function to handle.
+
+However, there is an `if` condition in the middle of the function which does not return the allocated `int`, but rather returns a `nullptr` (that's how `null` is specified in _C++_). In this flow we get a situation where the allocated `int` is neither released nor returned. Meaning that we have allocated memory, and keep it allocated forever, because when the function returns with `null`, no one has the address of the allocation anymore, so no one can release it anymore. 
+
+This is called a memory leak - a situation where we allocated memory and cannot release it. For one `int` (4 bytes) this may be fine, but if this function is called thousands of times... then we may have leaked **Kilobytes** (1 kilo = 1000 bytes) of data and that is a serious, as the leaked memory cannot be used by anyone.
+
+To solve this, we can modify the code of the function to release the memory
+```c++
+int* doSomething() {
+  int* data = new int; // allocate an int on the heap
+
+  // do some stuff ....
+
+  if (error != 0) {
+    // if we've encountered an error, return a null
+    delete data; // release the allocation
+    return nullptr;
+  }
+
+  // return the allocated int
+  return data;
+}
+```
+
+So this problem has a solution. But the reason we concern ourselves with it is because it is very easy to miss or forget to release memory by accident, not by intention. Because of how complex this issue can become, when _Java_ was first released it came along with something quite unique: A _Garbage Collector_.
+
+You may have noticed that you never do something like `delete` in _Java_. This is because the mechanism called _Garbage Collector_ is responsible for doing this for us. It is a part of the _JVM_ and operates in the background. Every some time, it will run over the heap allocation and release all allocations which are no longer _referenced_. This means that the user does not need to worry about releasing on their own, and this thus avoids a lof of memory leaking and management problems.
+
+As mentioned previously, variables which hold the addresses to heap allocations are called _references_. Each variable doing so would be considered as one additional _reference_ to the memory. When there are no such variables then there are 0 references and the _GC_ can release the allocation.
 
 ### Comparison
 
