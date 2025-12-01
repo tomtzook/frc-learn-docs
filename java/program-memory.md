@@ -338,7 +338,7 @@ The creation of an instance of `Person` requests allocation of memory from the h
 
 The access to specific variables in the class, is about accessing specific subsets of memory within the allocation. In the _bytecode_ this is done with `getfield #16 <Main$Person.age : I>`, but in native code this will be basically reading the memory. If we take the base address from _person_, we can read the memory at `person + metadata_size`.
 
-> [!INFO]
+> [!NOTE]
 > You can see in the bytecode that the line `invokespecial #9 <Main$Person.<init> : ()V>` is added after `new`
 > despite not writing it explicitly in _Java_ code. This is the call to the constructor and is part of the `new` procedure but after allocation.
 
