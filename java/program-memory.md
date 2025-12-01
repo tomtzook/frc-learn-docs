@@ -315,14 +315,34 @@ class Person {
 
 public static void main(String[] args) {
     Person person = new Person();
+    System.out.println(person.age);
 }
 ```
 
-The creation of an instance of `Person` requests allocation of memory from the heap with a size based on the contents of the class. This does not include the code of the class, but just the data. In this case, the data size will be 12 bytes (`int` + `double`) with the addition of some metadata about the class (a minimum of 12 bytes) for a total of 24 bytes. 
+```
+main:
+ 0 new #7 <Main$Person>
+ 3 dup
+ 4 invokespecial #9 <Main$Person.<init> : ()V>
+ 7 astore_1
+ 8 getstatic #10 <java/lang/System.out : Ljava/io/PrintStream;>
+11 aload_1
+12 getfield #16 <Main$Person.age : I>
+15 invokevirtual #20 <java/io/PrintStream.println : (I)V>
+18 return
+```
+
+The creation of an instance of `Person` requests allocation of memory from the heap with a size based on the contents of the class. This does not include the code of the class, but just the data. In this case, the data size will be 12 bytes (`int` + `double`) with the addition of some metadata about the class (a minimum of 12 bytes) for a total of 24 bytes. The variable _person_ stores the address of the memory in the heap as returned during allocation.
 
 <img width="143" height="365" alt="image" src="https://github.com/user-attachments/assets/88f623ae-5cbd-4cde-8e01-01ea723a64ed" />
 
-The access to specific variables in the class, is about accessing specific subsets of memory within the allocation.
+The access to specific variables in the class, is about accessing specific subsets of memory within the allocation. In the _bytecode_ this is done with `getfield #16 <Main$Person.age : I>`, but in native code this will be basically reading the memory. If we take the base address from _person_, we can read the memory at `person + metadata_size`.
+
+> [!NOTE]
+> You can see in the bytecode that the line `invokespecial #9 <Main$Person.<init> : ()V>` is added after new
+> despite not writing it explicitly in _Java_ code. This is part of the `new` procedure but after allocation.
+
+
 
 #### Garbage Collector
 
