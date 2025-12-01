@@ -189,8 +189,11 @@ Line 4: we call the function `func`. This will push the return address (line 5) 
 <img width="280" height="167" alt="image" src="https://github.com/user-attachments/assets/3d9573d7-f103-4618-ad41-01fa8c94d954" />
 
 Line 7: here we start the function by reading the first parameter into register `rax` (from address `0xffc`). This does not modify the stack
+
 Line 8: we read the second parameter into register `rcx` (from address `0xff8`). This does not modify the stack.
+
 Line 9: we perform the add instruction between `rax` and `rcx` with the result being placed in `rax`. This does not modify the stack.
+
 Line 10: we place the result from `rax` into the stack (address `0x1ff4`)
 
 <img width="280" height="176" alt="image" src="https://github.com/user-attachments/assets/7c37530b-d344-4425-92bf-61433d71c743" />
