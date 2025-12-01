@@ -22,13 +22,6 @@ Consider the following questions:
 These questions refer to basic needs of any program and there answer depends on how memory is managed in the program. In this article we will
 go over how this is done in _Java_.
 
-## General Memory Management
-
-Programs on an operating system will typically receive a contiguous (_virtual_) memory space to store all its stuff. This includes both code and data
-which are split into two distinct areas on purpose.
-
-**FINISH**
-
 ## Data Memory
 
 Data memory, which is memory used to store information, not code, is generally divided into two distinct structures: _The Heap_ and _The Stack_.
@@ -398,9 +391,9 @@ So this problem has a solution. But the reason we concern ourselves with it is b
 
 You may have noticed that you never do something like `delete` in _Java_. This is because the mechanism called _Garbage Collector_ is responsible for doing this for us. It is a part of the _JVM_ and operates in the background. Every some time, it will run over the heap allocation and release all allocations which are no longer _referenced_. This means that the user does not need to worry about releasing on their own, and this thus avoids a lof of memory leaking and management problems.
 
-As mentioned previously, variables which hold the addresses to heap allocations are called _references_. Each variable doing so would be considered as one additional _reference_ to the memory. When there are no such variables then there are 0 references and the _GC_ can release the allocation.
+As mentioned previously, variables which hold the addresses to heap allocations are called _references_. Each variable doing so would be considered as one additional _reference_ to the memory. When there are no such variables then there are 0 references and the _GC_ can release the allocation. 
 
-##### Demonstration
+This releasing is done periodically when the _GC_ runs. The trigger for running can differ and depends on _JVM_ implementation to determine when it is necessary. When this run is executed, the _GC_ will go over the heap, searching for allocations which are not referenced to free them, and organizing the heap segments. This can be a constly operation, and is especially noticable when there are many objects to release. So we must be careful not to overwork the _GC_ with a lot of short-lived allocations.
 
 Take a look at this simple program
 ```java
@@ -428,6 +421,7 @@ Let's us draw out how all the allocations we made look like
 
 <img width="555" height="626" alt="image" src="https://github.com/user-attachments/assets/abd8f408-6665-4072-996c-7f49eeb49792" />
 
+
 ### Comparison
 
 | Aspect | Stack | Heap |
@@ -438,5 +432,3 @@ Let's us draw out how all the allocations we made look like
 | Space | Very Limited | Large and expandable |
 | Defined By | CPU/Hardware | OS/Software |
 | Lifecycle | Scope/Function | Undefined | 
-
-## Code Memory
