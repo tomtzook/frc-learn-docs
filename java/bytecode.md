@@ -227,7 +227,10 @@ Take a look at the `func` method. It simply calls `add` with `10` and `12` as pa
   - This places the value as the second parameter of the impending method call
 - `invokestatic #2`: call method `add` (represented by `#2`)
   - this executes the method
-  - `invokestatic` is used specifically for `static` methods 
+  - `invokestatic` is used specifically for `static` methods
+  - because we are entering a new method, a transition is performed
+    - the stack top is loaded into the parameters of the function (in this case `num1` and `num2` from the things we pushed earlier)
+    - when we return from the method, the return value will be pushed unto the stack 
 - `istore_0` load the return value from the stack into local variable
   - the return value from the method call is placed on the stack, and will be at the top
   - the instruction will pop this value from the top of the stack
