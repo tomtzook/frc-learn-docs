@@ -1,4 +1,4 @@
-All programs, from the lowest to the heighest level, require some form of data storage to use. This is typically provided by the _Random Access Memory_ card
+All programs, from the lowest to the heighest level, require some form of data storage to use. This is typically provided by the _Random Access Memory_ (RAM) card
 connected to the motherboard. We can look at memory as a long contiguous space where we can store information in granuality of at least a single byte, with each
 _byte_ of memory being referred to by an address unique to it
 
@@ -28,11 +28,11 @@ Data memory, which is memory used to store information, not code, is generally d
 Each of these was made for a very specific set of uses, meaning that a program will need to use both and can rarely rely on just one of them.
 
 Most program data memory is both readable and writable, meaning my program can read the information in the memory and write information into the memory. But not all memory
-is such, some, typically _global const_ memory is typically only readable, but this is not of interest to us at the moment.
+is such, some, _global constant_ memory is typically only readable, but this is not of interest to us at the moment.
 
 ### Stack Memory
 
-The _stack_ memory, named so after its data structure - a stack, is used to store temporary local information as well as method call information (leading to it sometimes called _call stack_).
+The _stack_ memory, named so after its data structure - a stack, is used to store temporary local information as well as method call information (leading to it being called _call stack_).
 
 #### Structure
 
@@ -41,7 +41,7 @@ The stack structure is basic and normally defined by the CPU of the machine. Alt
 <img width="276" height="342" alt="image" src="https://github.com/user-attachments/assets/8b21ecbb-1963-4e46-85cb-852a4adb4d48" />
 
 There are several important characteristics to understand about the stack and how it works:
-- The stack of the program will receive a memory space when the program is created. This stack can be increased in size when needed.
+- The stack of the program will receive a memory space when the program is created. This stack can be increased in size sometimes, but it is not necessarily an option.
 - The stack has a position indicator (`RSP` on _x86 Intel_) which stores the next address to put memory at. It starts at the start of the stack.
 - Memory can be _pushed_ or _popped_ into the stack.
   - Pushing memory puts new data at the new position (based on `RSP`) and modifies the position indicator to the next address
@@ -60,7 +60,7 @@ The information is written on bytes at addresses `2000`, `1999`, `1998`, `1997`.
 
 <img width="266" height="154" alt="image" src="https://github.com/user-attachments/assets/e3743270-0008-4deb-bb9e-819a38ad8608" />
 
-Next, let's write another 4 bytes of information with `push 10`, which writes 4 bytes of information with the value `5` into the current stack pointer (address `1996`).
+Next, let's write another 4 bytes of information with `push 10`, which writes 4 bytes of information with the value `10` into the current stack pointer (address `1996`).
 The information is written on bytes at addresses `1996`, `1995`, `1994`, `1993`. The new stack pointer will be at position `1992`.
 
 <img width="268" height="151" alt="image" src="https://github.com/user-attachments/assets/70c8a21e-891e-4f42-9465-f92fd74eca64" />
@@ -122,8 +122,8 @@ func:
 
 We start with some stack with the stack pointer at position `0x2000`, and start the code on the call to `func` function.
 This will place the following on the stack
-- first parameter, `num1`, value given is `55` in 4 bytes, _bytecode_: `bipush 55` (conditional)
-- second parameter, `num2`, value given is `21` in 4 bytes, _bytecode_: `bipush 21` (conditional)
+- first parameter, `num1`, value given is `55` in 4 bytes, _bytecode_: `bipush 55`
+- second parameter, `num2`, value given is `21` in 4 bytes, _bytecode_: `bipush 21`
 - space for placing the return value from the function, 4 bytes, not seen in the code.
 - the intended return address from `add`, which is to line `7` in the bytecode (done as part of `invokestatic`).
 
@@ -214,7 +214,7 @@ You might also have noticed that the caller (`main`) and callee (`func`) have to
 > [!NOTE]
 > If you ever heared the term _stack overflow_ or _stack overrun_, this usually refers to an issue where
 > the program has reached the end of the stack. I.e. it has no more space in the stack and cannot continue.
-> It could also refer to situations where code access the wrong locations on the stack.
+> It could also refer to situations where code accesses the wrong locations on the stack.
 
 For another example, I've set up a program with a debugger to show how the stack is managed for us
 ```java
@@ -332,7 +332,7 @@ The creation of an instance of `Person` requests allocation of memory from the h
 
 <img width="143" height="365" alt="image" src="https://github.com/user-attachments/assets/88f623ae-5cbd-4cde-8e01-01ea723a64ed" />
 
-The access to specific variables in the class, is about accessing specific subsets of memory within the allocation. In the _bytecode_ this is done with `getfield #16 <Main$Person.age : I>`, but in native code this will be basically reading the memory. If we take the base address from _person_, we can read the memory at `person + metadata_size`.
+The access to specific variables in the class, is about accessing specific subsets of memory within the allocation. In the _bytecode_ this is done with `getfield #16 <Main$Person.age : I>`, but in native code this will be basically reading the memory. If we take the base address from _person_, we can read the memory at `person + metadata_size` to get the age value.
 
 > [!NOTE]
 > You can see in the bytecode that the line `invokespecial #9 <Main$Person.<init> : ()V>` is added after `new`
