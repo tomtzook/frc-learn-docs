@@ -242,4 +242,4 @@ Let's look at the `add` function, which is made up of a single line of addition.
 - `iadd`: perform addition between the 2 top-most values in the stack, pop them, and push the result unto the stack
 - `ireturn`: return from the function with an `int` from the top of the stack
 
-
+You can try looking at _bytecode_ yourselves in [compiler explorer](https://godbolt.org/). Select _Java_ as the language, write you code and see the resulting _bytecode_.
