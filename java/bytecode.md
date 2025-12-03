@@ -173,6 +173,70 @@ There are several characteristics of _bytecode_ we should understand:
 - It is stack-oriented. All operations are done on the stack without the use of any registers. This makes sense as being hardware-independent makes it difficult to use registers which are very hardware-specific.
   - this is not to say that registers won't be used after compilation into _machine code_. It is just that as far as writing _bytecode_ is concerned, they are not a thing.
   - this also simplifies and shrinks the amount of instructions necessary, as everything works on the stack, so no need for instructions that also support multiple sources (like all the registers as well as memory).
+  - It is important to understand that this is not entirely the same thing to when we discuss stack memory of a program. It is called the operand stack and used to do operations. The real stack will be used in the end, but is referenced in the resulting _Machine Code_.
 - It retains the oop structure of the original code. This may be unexpected, but the _JVM_ is largely oriented on OOP.
   - when looking at full _bytecode_ of a class one can see that it is divided by methods and classes. We've only seen the contents of methods so far and not discussed the surrounding information
   - each `.java` file is basically compiled into a `.class` file which contains the _bytecode_.
+ 
+You can find full list of instructions [here](https://en.wikipedia.org/wiki/List_of_Java_bytecode_instructions) and [here](https://docs.oracle.com/javase/specs/jvms/se7/html/jvms-6.html)
+
+#### Example Program
+
+Let us analyze an example of _bytecode_ to understand what it does
+```java
+// Type your code here, or load an example.
+class Main {
+    static void func1() {
+        int res = add(10, 12);
+    }
+
+    static int add(int num1, int num2) {
+        return num1 + num2;
+    }
+}
+```
+
+```
+class Main {
+  Main();
+       0: aload_0
+       1: invokespecial #1 // Method java/lang/Object."<init>":()V
+       4: return
+
+
+  static void func1();
+       0: bipush        10
+       2: bipush        12
+       4: invokestatic  #2 // Method add:(II)I
+       7: istore_0
+       8: return
+
+
+  static int add(int, int);
+       0: iload_0
+       1: iload_1
+       2: iadd
+       3: ireturn
+}
+```
+
+Take a look at the `func` method. It simply calls `add` with `10` and `12` as parameters and stores the return value. This single line is represented by 4 _bytecode_ instructions:
+- `bipush 10`: push the value 10 unto the stack.
+  - This places the value as the first parameter of the impending method call 
+- `bipush 12`: push the value 12 unto the stack
+  - This places the value as the second parameter of the impending method call
+- `invokestatic #2`: call method `add` (represented by `#2`)
+  - this executes the method
+  - `invokestatic` is used specifically for `static` methods 
+- `istore_0` load the return value from the stack into local variable
+  - the return value from the method call is placed on the stack, and will be at the top
+  - the instruction will pop this value from the top of the stack
+  - `_0` in the instruction indicates that the value should be loaded unto local variable number `0`, whhich is `res` in our case. In _bytecode_ local variables are their own thing. In _Machine Code_ they would be stored on the stack or in a register.
+ 
+Let's look at the `add` function, which is made up of a single line of addition.
+- `iload_0`: push the value of local variable 0 (`num1`) unto the stack. 
+- `iload_1`: push the value of local variable 1 (`num2`) unto the stack. 
+- `iadd`: perform addition between the 2 top-most values in the stack, pop them, and push the result unto the stack
+- `ireturn`: return from the function with an `int` from the top of the stack
+
+
