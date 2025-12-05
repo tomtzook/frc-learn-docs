@@ -238,8 +238,69 @@ Take a look at the `func` method. It simply calls `add` with `10` and `12` as pa
  
 Let's look at the `add` function, which is made up of a single line of addition.
 - `iload_0`: push the value of local variable 0 (`num1`) unto the stack. 
-- `iload_1`: push the value of local variable 1 (`num2`) unto the stack. 
+- `iload_1`: push the value of local variable 1 (`num2`) unto the leop.stack. 
 - `iadd`: perform addition between the 2 top-most values in the stack, pop them, and push the result unto the stack
 - `ireturn`: return from the function with an `int` from the top of the stack
 
+You might be wonderig what this `#2` actually means. So other than the actual _bytecode_ itself, the compiled output `.class`,
+contains meta information about the method, static variables, classes, and so on. So `#2` refers basically to the second entry
+in the function table, which is `add` in this case. The function table, we're refering to specifically holds information for function calls.
+
 You can try looking at _bytecode_ yourselves in [compiler explorer](https://godbolt.org/). Select _Java_ as the language, write you code and see the resulting _bytecode_.
+
+Let's try to analyze another program:
+
+```java
+class Main {
+    static void func1() {
+        int res = multiply(10, 12);
+    }
+
+    static int multiply(int num1, int num2) {
+        int result = 0;
+        for (int i = 0; i < num2; i++) {
+            result += num1;
+        }
+
+        return result;
+    }
+}
+```
+
+```
+class Main {
+  Main();
+       0: aload_0
+       1: invokespecial #1 // Method java/lang/Object."<init>":()V
+       4: return
+
+
+  static void func1();
+       0: bipush        10
+       2: bipush        12
+       4: invokestatic  #7 // Method multiply:(II)I
+       7: istore_0
+       8: return
+
+
+  static int multiply(int, int);
+       0: iconst_0
+       1: istore_2
+       2: iconst_0
+       3: istore_3
+       4: iload_3
+       5: iload_1
+       6: if_icmpge     19
+       9: iload_2
+      10: iload_0
+      11: iadd
+      12: istore_2
+      13: iinc          3, 1
+      16: goto          4
+      19: iload_2
+      20: ireturn
+
+}
+```
+
+You can quickly notice 
