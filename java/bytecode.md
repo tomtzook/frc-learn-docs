@@ -244,7 +244,7 @@ Let's look at the `add` function, which is made up of a single line of addition.
 
 You might be wonderig what this `#2` actually means. So other than the actual _bytecode_ itself, the compiled output `.class`,
 contains meta information about the method, static variables, classes, and so on. So `#2` refers basically to the second entry
-in the function table, which is `add` in this case. The function table, we're refering to specifically holds information for function calls.
+in the function table, which is `add` in this case. 
 
 You can try looking at _bytecode_ yourselves in [compiler explorer](https://godbolt.org/). Select _Java_ as the language, write you code and see the resulting _bytecode_.
 
@@ -303,4 +303,21 @@ class Main {
 }
 ```
 
-You can quickly notice 
+You can quickly notice that `func1` is actually almost identical to the one before, just the function identifier is not the same. And `multiply` is rather much bigger than `add` but this is given since we do much more in it. So we'll skip `func1` and focus on `multiply`:
+- `iconst_0`: loads the value `0` unto the stack
+- `istore_2`: pops the top of the stack unto local variable _2_. This essentially puts 0 (loaded previously unto the stack) into that variable. This is the `result` variable, basically doing the fist line of the function.
+- `iconst_0`: loads the value `0` unto the stack
+- `istore_3`: pops the top of the stack unto local variable _3_. This is like before but with the variable `i` (for the loop).
+- `iload_3`: loads the value from local variable _3_ (`i`) unto the stack.
+- `iload_1`: loads the value from local variable _1_ (`num2`) unto the stack.
+- `if_icmpge 19`: pops two values from the stack, _value1_ and _value2_ respectively. Compares them as `value1 >= value2`. If `true` then the code jumps to line `19`. This is essentially the check in the for loop `i < num2`, just reversed a bit. Jumping to line `19` is skipping the loop. Continuing is entering the loop.
+- `iload_2`: loads the value from local variable _2_ (`result`) unto the stack.
+- `iload_0`: loads the value from local variable _0_ (`num1`) unto the stack.
+- `iadd`: pops two values from the stack and performs addition, storing the result in the stack. This essential does `result + num1`
+- `istore_2`: pops the top of the stack unto local variable _2_ (`result`). Together with the previous line we get `result = result + num1`.
+- `iinc 3, 1`: increases the values of local variable _3_ (`i`) by 1. Basically the `i++` of the for loop.
+- `goto 4`: jump to line 4, basically running the loop again.
+- `iload_2`: loads the value from local variable _2_ (`result`) unto the stack.
+- `ireturn`: return from the function. The last value on the stack is the return value.
+
+This should help clarify the meaning of _stack-oriented_ here: every operation is done on values in the stack.
