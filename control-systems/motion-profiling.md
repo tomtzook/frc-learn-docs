@@ -28,7 +28,7 @@ Now, let's compare this to how a basic _PID_ controller will behave. I've set up
 
 The acceleration is marked in _Green_. Velocity in _Red_ and Position in _Blue_. 
 
-Notice the insane magnitude of the acceleration at the start and how quickly it is reached. As this is a simulation, not damage is done, but on a real system... For the record, the acceleration peaks at around `2500` _Degrees per second per second_. 
+Notice the insane magnitude of the acceleration at the start and how quickly it is reached. As this is a simulation, not damage is done, but on a real system... For the record, the acceleration peaks at around `2500` _Degrees per second per second_ and is reached in virtually an instance.
 
 Now the same simulation, but with the appliance of controlled motion.
 
@@ -36,7 +36,7 @@ Now the same simulation, but with the appliance of controlled motion.
   <img width="727" height="346" alt="image" src="https://github.com/user-attachments/assets/89d816ca-7496-4013-b248-7e57d7dd4eb3" />
 </p>
 
-Now the acceleration actually ramps up slowly instead of rising up at an insane jerk. The maximum acceleration is also different, because I have limited it in the motion parameters. This should help illustrate the advantage of using a more controlled motion.
+Now the acceleration actually ramps up slowly instead of rising up at an insane jerk, taking around 1.2 secounds to reach its peak. The maximum acceleration is also different, because I have limited it in the motion parameters. This should help illustrate the advantage of using a more controlled motion.
 
 > [!NOTE]
 > The term _Jerks_ refers to the rate of change of the acceleration.
