@@ -10,10 +10,30 @@ For the reasons above, it is typically advised to slowly ramp up or down the mot
 We can descirbe the wanted behaviour of the motor (position, velocity, acceleration) under these requirements as such:
 
 <p align="center">
-  <img width="390" height="455" alt="image" src="https://github.com/user-attachments/assets/e0510d95-5883-44c1-99fd-235822835c21" />
+  <img width="486" height="455" alt="image" src="https://github.com/user-attachments/assets/96de8a06-0092-47bc-bed5-d686184b896f" />
 </p>
 
 - We start at 0 position, velocity and acceleration
 - _Acceleration Phase_: Accelerate the motor until reaching maximum wanted velocity
 - _Cruise Phase_: staying at the maximum velocity, contine moving
 - _Deceleration Phase_: Decelerate the motor until stopping
+
+This may seem like a completely normal motion, and it is. As controlled motion typically does look like this. It's worth noting that both the velocity and acceleration increase at a relatively steady pace, and have a designated maximum value. This prevents the system from exceeding its capabilities (assuming the maximum velocity and acceleration are within system tolerance).
+
+Now, let's compare this to how a basic _PID_ controller will behave. I've set up a simple simulation involving a free wheel operating with _PID_ and recorded the graph.
+
+<p align="center">
+  <img width="1114" height="473" alt="image" src="https://github.com/user-attachments/assets/39cd8ed5-12ba-4516-8200-bd81a6d79dd6" />
+</p>
+
+The acceleration is marked in _Green_. Velocity in _Red_ and Position in _Blue_. 
+
+Notice the insane magnitude of the acceleration at the start and how quickly it is reached. As this is a simulation, not damage is done, but on a real system... For the record, the acceleration peaks at around `2500` _Degrees per second per second_. 
+
+Now the same simulation, but with the appliance of controlled motion.
+
+<p align="center">
+  <img width="727" height="346" alt="image" src="https://github.com/user-attachments/assets/89d816ca-7496-4013-b248-7e57d7dd4eb3" />
+</p>
+
+Now the acceleration actually ramps up slowly instead of rising up at an insane jerk. The maximum acceleration is also different, because I have limited it in the motion parameters. This should help illustrate the advantage of using a more controlled motion.
