@@ -82,7 +82,11 @@ And so, when a code consumes this _profile_ it will read this information and se
 
 This divides _motion profiling_ into two distinct and important parts:
 - generating a _profile_, based on requested settings
-- following a requested _profile_
+- following that _profile_
+
+> [!NOTE]
+> It is also quite common to see generation of the profile on the fly during execution of motion. In these
+> algorithms, the _profile_ is only every generated for the next motion set point.
 
 ### Profile Shapes
 
@@ -101,6 +105,8 @@ The _acceleration_ and _deceleration_ phases are of the same length and accelera
 #### Trapezoid Profile
 
 #### S-Curve Profile
+
+### Generating a Profile
 
 ### Following a Profile
 
