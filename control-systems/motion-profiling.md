@@ -37,3 +37,77 @@ Now the same simulation, but with the appliance of controlled motion.
 </p>
 
 Now the acceleration actually ramps up slowly instead of rising up at an insane jerk. The maximum acceleration is also different, because I have limited it in the motion parameters. This should help illustrate the advantage of using a more controlled motion.
+
+> [!NOTE]
+> The term _Jerks_ refers to the rate of change of the acceleration.
+
+## Motion Profiling
+
+The idea of creating a controlled motion can be performed via the process of _Motion Profiling_. In this process, the computer/robot or a person create a _Profile_ of the wanted motion, specifying the position, velocity and acceleration of the robot at a series of points in time. The robot must then follow these specifications (matching its position, velocity and acceleration to those specified in the _profile_) to acheive the wanted motion.
+
+This allows us to create a very specific way for the system to perform movement, which includes limiting velocity/acceleration, or even more.
+
+At its core though, _Motion Profiling_ relies on our ability to control the system's position and velocity (sometimes _acceleration_ too) with high accuracy, as something must make the robot follow the exact _profile_. This is typically done using _Feedback_ and _Feedforward_ controllers (like _PID_). Essentially, _Motion Profiling_ cannot exist on its own. So the idea is: instead of the _PID_ controller alone trying to reach our goal, the _Motion Profile_ will dictate _set points_ for it to control the motion.
+
+A _motion profile_ would typically look something like this:
+```json
+{
+  "maxVelocity": 20,      // Degrees per second
+  "maxAcceleration": 10,  // Degrees per second per second
+  "points": [
+      {
+          "time": 0,          // seconds
+          "position": 0,      // Degrees
+          "velocity": 0,      // Degrees per second
+          "acceleration": 0   // Degrees per second per second
+      },
+      {
+          "time": 0.5,
+          "position": 1,
+          "velocity": 2,
+          "acceleration": 2
+      },
+      {
+          "time": 1,
+          "position": 2,
+          "velocity": 3,
+          "acceleration": 8
+      },
+      // ... more points
+  ]
+}
+```
+
+And so, when a code consumes this _profile_ it will read this information and seek to follow it by, at each moment in time specified, reaching the requested _position_, _velocity_ and _acceleration_ as best as possible. Failing to do so will cause the motion to drift from the wanted _profile_.
+
+This divides _motion profiling_ into two distinct and important parts:
+- generating a _profile_, based on requested settings
+- following a requested _profile_
+
+### Profile Shapes
+
+Generating _profiles_ requires the user to provide specifications for the wanted profile. This includes _max velocity_ and _max acceleration_, but also the wanted motion _type_ (_shape_). This _shape_ is a quick way to provide characteristics and behaviour for how the _profile_ should be generated. There is no inheritently better type, they each have advantages and disadvantages. They are typically named around the shape the make on a _velocity graph_.
+
+#### Triangle Profile
+
+A triangular _profile_ divides the motion into two parts of motion: _acceleration_ and _deceleration_. The system will accelerate until a designated maximum velocity is reached and will then immediatly start decelerating until stopping at the end. This gives the _velocity_ its _triangular_ shape.
+
+<p align="center">
+  <img width="472" height="349" alt="image" src="https://github.com/user-attachments/assets/c459fcc4-0716-4a20-9efd-b16648a8f9e0" />
+</p>
+
+The _acceleration_ and _deceleration_ phases are of the same length and acceleration values, and no time is spent in constant velocity. This makes the _profile_, generally faster and makes sense for quicker actions. Because the geometry of a triangle is very simple, it makes it easy to calculate the profile points.
+
+#### Trapezoid Profile
+
+#### S-Curve Profile
+
+### Following a Profile
+
+### Using with WPILib
+
+### Using in-built Controller Capabilities
+
+#### CTRE
+
+#### REV
