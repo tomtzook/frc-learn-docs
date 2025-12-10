@@ -102,26 +102,42 @@ A triangular _profile_ divides the motion into two parts of motion: _acceleratio
 
 The _acceleration_ and _deceleration_ phases are of the same length and acceleration values, and no time is spent in constant velocity. This makes the _profile_, generally faster and makes sense for quicker actions. Because the geometry of a triangle is very simple, it makes it easy to calculate the profile points.
 
-Let's declare the acceleration used as $A$, the maximum velocity as $V_{max}$ and our target position as $X_f$, using physics formulas for linear motion we can calculate the expected states. Let's break it down into the two phases. This is necessary because the physics formulas we work with function only for constant acceleration, so our motion has to be divided into two parts.
+Let's declare the acceleration used as $A$, the maximum velocity as $V_{max}$ and our target position as $X_f$, using physics formulas for linear motion we can calculate the expected states. Let's break it down into the two phases.
 
-For phase 1 (_acceleration_) we start with $V_0 = 0, X_0 = 0$ and can find out what should happen at the end of the phase.
+For phase 1 (_acceleration_) we start with $V_0 = 0, X_0 = 0$. We can describe each position and velocity in the phase as a function of time:
 
-$$ V_fp1 = V_{max} = V_0 + A * t_fp1 $$
+$$ V = V_0 + a * t = A * t $$
 
-$$ t_fp1 = \frac{V_{max}}{A} $$
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 = 0.5 * A * t^2 $$
 
-Since $V_{max}$ and $A$ are constants defined by the user, we can use it to calculate the position at the end of the phase.
+We describe the time it takes for this phase with
 
-$$ X_fp1 = X_0 + V_0 * t_fp1 + 0.5 * A * t_fp1^2 $$
+$$ T = \frac{V_{max}}{A} $$
 
-$$ X_fp1 = 0.5 * A * \frac{V_{max}^2}{A^2} = 0.5 * \frac{V_{max}^2}{A} $$
+Since both phases use the same acceleration value, we can say that they both take $T$ time, for a total of $2T$.
 
-And for the second phase (_deceleration_), the acceleration is just $-A$, with $X_0 = X_fp1$ and $V_0 = V_{max}$. The final velocity will, of course, be $0$. Our $t$ is measured from the start of the phase, but because we decelerate at the same speed, we get that the time for each phase is the same.
+For phase 2 (_deceleration_) we start with $V_0 = V_{max}, X_0 = X_{e1}$ where $X_{e1}$ is the position we ended phase 1 with. We can agin describe each position and velocity as a function of time, with our start time for the phase being $0$:
+ 
+$$ V = V_0 + a * t = V_{max} - A * t $$
 
-$$ X_f = X_fp1 + V_{max} * t_fp1 + 0.5 * -A * t_fp1^2 $$
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 = X_{e1} + V_{max} * t - 0.5 * A * t^2 $$
 
-$$ X_f = X_fp1 + V_{max} * \frac{V_{max}}{A} + 0.5 * -A * \frac{V_{max}^2}{A^2} $$
+With this in hand, we can feed timestamps into the functions to provide which position and velocity we should follow for the profile. A pseudo code, can look like this
 
+```
+calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
+  accelerationTime = maxVelocity / maxAcceleration
+  if currentTime <= accelerationTime:
+    // we are at phase 1
+    position = 0.5 * maxAcceleration * currentTime * currentTime
+    velocity = maxAcceleration * currentTime
+  else:
+    // we are at phase 2
+    currentTime = currentTime - accelerationTime // we want to calculate with time starting at phase start
+    x0 = 0.5 * maxAcceleration * accelerationTime * accelerationTime // we need the position we ended phase 1 with
+    position = x0 + maxVelocity * currentTime - 0.5 * maxAcceleration * currentTime * currentTime
+    velocity = maxVelocity - maxAcceleration * decelCurrentTime
+```
 
 #### Trapezoid Profile
 
