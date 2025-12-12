@@ -515,7 +515,6 @@ class TestSystem extends SubsystemBase {
 
     encoder = motor.getEncoder();
     closedLoopController = motor.getClosedLoopController();
-    ffController = new SimpleMotorController(KS, KV, KA);
   }
 
   public double getPosition() {
