@@ -88,9 +88,15 @@ This divides _motion profiling_ into two distinct and important parts:
 > It is also quite common to see generation of the profile on the fly during execution of motion. In these
 > algorithms, the _profile_ is only every generated for the next motion set point.
 
-### Profile Shapes
+### Generating a Profile
 
 Generating _profiles_ requires the user to provide specifications for the wanted profile. This includes _max velocity_ and _max acceleration_, but also the wanted motion _type_ (_shape_). This _shape_ is a quick way to provide characteristics and behaviour for how the _profile_ should be generated. There is no inheritently better type, they each have advantages and disadvantages. They are typically named around the shape the make on a _velocity graph_.
+
+When provided with specification, we can produce both wanted _position_ and _velocity_ for each given moment in time. These can then be followed by the robot. 
+
+_Profiles_ may be generated ahead of time, or during execution. This is usually dependent on the complexity of the _profile_, and whether the specifications are known ahead of time. Complex _profiles_ are usually generated ahead of time, due to the amount of work needed to make them, which may slow down execution. But simple _profiles_ can be easily created during use.
+
+Let's look at different _profile_ shapes to understand how to generate them.
 
 #### Triangle Profile
 
@@ -252,10 +258,6 @@ calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
     velocity = maxVelocity - maxAcceleration * currentTime
     
 ```
-
-#### S-Curve Profile
-
-### Generating a Profile
 
 ### Following a Profile
 
