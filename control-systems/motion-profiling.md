@@ -378,9 +378,6 @@ class TestSystem extends SubsystemBase {
   private static final double KP = ...;
   private static final double KI = ...;
   private static final double KD = ...;
-  private static final double KS = ...;
-  private static final double KV = ...;
-  private static final double KA = ...;
   private static final double PROFILE_MAX_VELOCITY = ...;
   private static final double PROFILE_MAX_ACCELERATION = ...;
   private static final double MOTOR_ROTATIONS_TO_POSITION = ...;
@@ -405,9 +402,6 @@ class TestSystem extends SubsystemBase {
     talonConfiguration.Slot0.kP = KP;
     talonConfiguration.Slot0.kI = KI;
     talonConfiguration.Slot0.kD = KD;
-    talonConfiguration.Slot0.kS = KS;
-    talonConfiguration.Slot0.kV = KV;
-    talonConfiguration.Slot0.kA = KA;
     talonConfiguration.MotionMagic.MotionMagicCruiseVelocity = PROFILE_MAX_VELOCITY / MOTOR_ROTATIONS_TO_POSITION;
     talonConfiguration.MotionMagic.MotionMagicAcceleration = PROFILE_MAX_ACCELERATION / MOTOR_ROTATIONS_TO_POSITION;
     motor.getConfigurator().apply(talonConfiguration);
@@ -479,3 +473,105 @@ class TestCommand extends Command {
 ```
 
 #### REV
+
+**REV** actually provides two forms of _motion profiling_: the **old** _smart motion_ and the **new** _max motion_. We would prefer to use the new _max motion_, since it is
+better (they implemented it differently). We'll do most of the work in the subsystem to configure and run it.
+
+```java
+class TestSystem extends SubsystemBase {
+
+  private static final int MOTOR_ID = ...;
+  private static final double GEAR_RATIO = ...;
+  private static final double KP = ...;
+  private static final double KI = ...;
+  private static final double KD = ...;
+  private static final double PROFILE_MAX_VELOCITY = ...;
+  private static final double PROFILE_MAX_ACCELERATION = ...;
+  private static final double MOTOR_ROTATIONS_TO_POSITION = ...;
+  private static final double POSITION_MARGIN = ...;
+  private static final double VELOCITY_MARGIN = ...;
+
+  private final SparkMax motor;
+
+  private final RelativeEncoder encoder;
+  private final SparkClosedLoopController closedLoopController;
+
+  public TestSystem() {
+    motor = new SparkMax(MOTOR_ID, SparkLowLevel.MotorType.kBrushless);
+
+    // we need to configure PID, FF and MotionMagic.
+    // remember that we need to use the encoder measurement units.
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.encoder.positionConversionFactor(1 / GEAR_RATIO)
+                .velocityConversionFactor(1 / GEAR_RATIO);
+    config.closedLoop.p(KP);
+    config.closedLoop.i(KI);
+    config.closedLoop.d(KD);
+    config.closedLoop.feedbackSensor(ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder);
+    config.closedLoop.maxMotion.positionMode(MAXMotionConfig.MAXMotionPositionMode.kMAXMotionTrapezoidal);
+    config.closedLoop.maxMotion.maxVelocity(PROFILE_MAX_VELOCITY);
+    config.closedLoop.maxMotion.maxAcceleration(PROFILE_MAX_ACCELERATION);
+    motor.configure(config, SparkBase.ResetMode.kNoResetSafeParameters, SparkBase.PersistMode.kNoPersistParameters);
+
+    encoder = motor.getEncoder();
+    closedLoopController = motor.getClosedLoopController();
+    ffController = new SimpleMotorController(KS, KV, KA);
+  }
+
+  public double getPosition() {
+    return encoder.getPosition() * MOTOR_ROTATIONS_TO_POSITION;
+  }
+
+  public double getVelocity() {
+    return encoder.getVelocity() / 60 * MOTOR_ROTATIONS_TO_POSITION;
+  }
+
+  public boolean isAtTarget(double targetPosition, double targetVelocity) {
+    return Math.abs(targetPosition - getPosition()) < POSITION_MARGIN && Math.abs(targetVelocity - getVelocity()) < VELOCITY_MARGIN;
+  }
+
+  public void setPosition(double targetPosition) {
+      // run smart motion, only needs to be done once, initialize
+      pidController.setReference(
+            targetPosition / MOTOR_ROTATIONS_TO_POSITION,
+            SparkBase.ControlType.kMAXMotionPositionControl,
+            ClosedLoopSlot.kSlot0);
+  }
+
+  public void stop() {
+    motor.stop();
+  }
+}
+
+class TestCommand extends Command {
+
+  private final TestSystem system;
+  private final double targetPosition;
+
+  public TestCommand(TestSystem system, double targetPosition) {
+    this.system = system;
+    this.targetPosition = targetPosition;
+
+    addRequirements(system);
+  }
+
+
+  @Override
+  public void initialize() {
+    system.setPosition(targetPosition);
+  }
+
+  @Override
+  public void execute() {}
+
+  @Override
+  public void end(boolean interrupted) {
+    system.stop();
+  }
+
+  @Override
+  public boolean isFinished() {
+    return system.isAtTarget(targetPosition, 0);
+  }
+}
+```
