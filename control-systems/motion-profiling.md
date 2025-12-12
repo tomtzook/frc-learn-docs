@@ -175,6 +175,84 @@ $$ V_{max} = \frac{D * A}{2} $$
 
 #### Trapezoid Profile
 
+A trapezoidal _profile_ divides the motion into three parts of motion: _acceleration_, _cruise_ and _deceleration_. The system will accelerate until a designated maximum velocity is reached and will then stay on that velocity for awhile, and then start decelerating until stopping at the end. This gives the _velocity_ its _trapezoid_ shape.
+
+<p align="center">
+  <img width="505" height="367" alt="image" src="https://github.com/user-attachments/assets/f5c56faa-fb7c-4192-86c5-b08708294b93" />
+</p>
+
+The _acceleration_ and _deceleration_ phases are of the same length and acceleration values, and the remaining time is spent in constant velocity. This makes the _profile_, simple, but more flexible than a _triangle_ one. Thanks to the _cruise_ phase, even if the _max velocity_ is reached, the profile still allows us to continue moving, reaching longer distances.
+
+Let's declare the acceleration used as $A$, the maximum velocity as $V_{max}$ and our target position as $X_f$, using physics formulas for linear motion we can calculate the expected states. Let's break it down into the three phases.
+
+For phase 1 (_acceleration_) we start with $V_0 = 0, X_0 = 0$. We can describe each position and velocity in the phase as a function of time:
+
+$$ V = V_0 + a * t $$
+
+$$ V = A * t $$
+
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 $$
+
+$$ X = 0.5 * A * t^2 $$
+
+We describe the time it takes for this phase with
+
+$$ T = \frac{V_{max}}{A} $$
+
+For phase 2 (_cruise_) we start with $V_0 = V_{max}, X_0 = X_{1}$, where $X_1$ is the distance we passed in the first phase. Because this phase is with a constant velocity, our forumlas are simplified. We can agin describe each position and velocity as a function of time, with our start time for the phase being $0$:
+
+$$ X = X_0 + V_0 * t $$
+
+$$ X = X_1 + V_{max} * t $$
+
+For phase 3 (_deceleration_) we start with $V_0 = V_{max}, X_0 = X_{2}$ where $X_{2}$ is the position we ended phase 2 with. We can agin describe each position and velocity as a function of time, with our start time for the phase being $0$:
+
+$$ V = V_0 + a * t $$
+
+$$ V = V_{max} - A * t $$
+
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 $$
+
+$$ X = X_{2} + V_{max} * t - 0.5 * A * t^2 $$
+
+We can declare the distance passed $D$ as the sum of distances passed in each phase, while these distances will be calculated as
+
+$$ D_1 = 0.5 * A * T^2 $$
+
+$$ D_2 = V_{max} * T_2 $$
+
+$$ D_3 = V_{max} * T - 0.5 * A * T^2 $$ 
+
+$$ D = D_1 + D_2 + D_3 $$
+
+$T_2$ is the time we spend in the second phase, and may or may not be the same time as the other phases. There is nothing dictating it needs to be.
+
+```
+// Provide the wanted distance, wanted maximum velocity, maximum acceleration for the profile and the timestamp.
+// Get the position and velocity of the profile at that timestamp.
+calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
+  accelerationTime = maxVelocity / maxAcceleration // the time needed to reach max velocity (T)
+  distancePassedInAcceleration = 0.5 * maxAcceleration * accelerationTime * accelerationTime // D1 and D3 values
+  distancePassedDuringCruise = distance - 2 * distancePassedInAcceleration // D2
+  cruiseTime = distancePassedDuringCruise / maxVelocity // T2
+
+  if currentTime <= accelerationTime:
+    // we are at phase 1
+    position = 0.5 * maxAcceleration * currentTime * currentTime
+    velocity = maxAcceleration * currentTime
+  else if currentTime <= (accelerationTime + cruiseTime):
+    // we are at phase 2
+    currentTime -= accelerationTime
+    position = distancePassedInAcceleration + maxVelocity * currentTime
+    velocity = maxVelocity
+  else:
+    // we are at phase 3
+    currentTime -= accelerationTime - cruiseTime
+    position = (distancePassedInAcceleration + distancePassedDuringCruise) + maxVelocity * currentTime - 0.5 * maxAcceleration * currentTime * currentTime
+    velocity = maxVelocity - maxAcceleration * currentTime
+    
+```
+
 #### S-Curve Profile
 
 ### Generating a Profile
