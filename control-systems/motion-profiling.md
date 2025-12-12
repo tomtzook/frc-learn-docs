@@ -39,7 +39,7 @@ Now the same simulation, but with the appliance of controlled motion.
 Now the acceleration actually ramps up slowly instead of rising up at an insane jerk, taking around 1.2 secounds to reach its peak. The maximum acceleration is also different, because I have limited it in the motion parameters. This should help illustrate the advantage of using a more controlled motion.
 
 > [!NOTE]
-> The term _Jerks_ refers to the rate of change of the acceleration.
+> The term _Jerk_ refers to the rate of change of the acceleration.
 
 ## Motion Profiling
 
@@ -133,8 +133,10 @@ $$ X = X_{e1} + V_{max} * t - 0.5 * A * t^2 $$
 With this in hand, we can feed timestamps into the functions to provide which position and velocity we should follow for the profile. A pseudo code, can look like this
 
 ```
+// Get the wanted end position, maximum velocity and maximum acceleration for the profile.
+// Get the timestamp for which to return the position and velocity of the profile.
 calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
-  accelerationTime = maxVelocity / maxAcceleration
+  accelerationTime = maxVelocity / maxAcceleration // the time needed to reach max velocity (T)
   if currentTime <= accelerationTime:
     // we are at phase 1
     position = 0.5 * maxAcceleration * currentTime * currentTime
