@@ -255,13 +255,112 @@ calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
     // we are at phase 3
     currentTime -= accelerationTime - cruiseTime
     position = (distancePassedInAcceleration + distancePassedDuringCruise) + maxVelocity * currentTime - 0.5 * maxAcceleration * currentTime * currentTime
-    velocity = maxVelocity - maxAcceleration * currentTime
-    
+    velocity = maxVelocity - maxAcceleration * currentTime    
 ```
 
 ### Following a Profile
 
+Once we are presented with a _profile_, no matter which or how it was generated, we must make the system follow it, otherwise it is pointless. We can expect two outputs from a _profile_: wanted _position_ and _velocity_; While there is typically two basic inputs: our _target position_ and the current timestamp. A such, we can consider a _profile_ generally as two functions $P(D, t)$ which provides us with the _position_ and $V(D, t)$ which provides us with the _velocity_, where $D$ is the _target position_ and $t$ is the timestamp.
+
+It is important to understand that we still need a _control loop_, which will ensure the system follows the output _position_ and _velocity_ from the _profile_. So following a _profile_ is a practice of taking the outputs from the _profile_ and feeding it into a calibrated _control loop_. We also need a way to follow the time, which the _profile_ is based on.
+
+We can use _PID_ and _FF_ together as our _control loop_. _PID_ can be responsible for following the _position_, while _Feed Forward_ can allow us to follow the _velocity_. As such, a pseudu code for following could look like this:
+
+```
+profile = createProfile(targetPosition, maxVelocity, maxAcceleration)
+startTime = getClockTime()
+while (startTime <= profile.endTime):
+  currentTime = getClockTime() - startTime
+  setPoint = profile.get(currentTime)
+
+  pidOutput = pid.calculate(getCurrentPosition(), setPoint.position)
+  ffOutput = ff.calculate(getCurrentVelocity(), setPoint.velocity)
+
+  system.set(pidOutput + ffOutput);
+}
+```
+
+There is one problem though. If only at time _t_, do we tell the system to go to the _position_ and _velocity_ required for time _t_, we will be delayed in our profile following. Consider that it takes time for a _control loop_ to get a system to a state. So, the system will end up falling behind the profile in this case. To solve this, we typically look ahead in the _profile_. Instead of working with the current time _t_, we will always ask the _profile_ for the next time's state (`t+1`) .
+
+We can modify the pseudu code, so that `currentTime` is bumped forward, say
+```
+nextTimestampDiff = 20ms
+currentTime = getClockTime() - startTime + nextTimestampDiff
+```
+
+As long as the _control loop_ is able to keep up with the required _position_ and _velocity_, the system will follow the _profile_. Because the system is following the _position_ and _velocity_ specified, the _acceleration_ will also be as specified by the _profile_, despite not being directly controlled by the _control loop_. This should be expected since the _profile_ used physics to calculate each set point, and following these set points, inheritenly requires that the system follows the same physics.
+
 ### Using with WPILib
+
+_WPILib_ provides us with generation for a _trapezoid profile_ in the form of the `TrapezoidProfile` class. The following `Command` shows an example of using this to control a system. We'll use _WPI_'s _PID_ and _FF_ controllers for our _control loop_, but one can use other's, like a motor controller's integrated loops.
+
+```java
+class TestCommand extends Command {
+
+  private static final double KP = ...;
+  private static final double KI = ...;
+  private static final double KD = ...;
+  private static final double KS = ...;
+  private static final double KV = ...;
+  private static final double KA = ...;
+  private static final double PROFILE_MAX_VELOCITY = ...;
+  private static final double PROFILE_MAX_ACCELERATION = ...;
+  private static final double POSITION_MARGIN = ...;
+  private static final double VELOCITY_MARGIN = ...;
+
+  private final TestSystem system;
+
+  private final PIDController pidController;
+  private final SimpleMotorFeedForward ffController;
+
+  private final TrapezoidProfile profile;
+  private final TrapezoidProfile.State profileGoal;
+  private TrapezoidProfile.State profileSetPoint;
+
+  public TestCommand(TestSystem system, double targetPosition) {
+    this.system = system;
+    this.pidController = new PIDController(KP, KI, KD);
+    this.ffController = new SimpleMotorController(KS, KV, KA);
+    this.profile = new TrapezoidProfile(new TrapezoidProfile.Constraints(PROFILE_MAX_VELOCITY, PROFILE_MAX_ACCELERATION));
+    this.profileGoal = new TrapezoidProfile.State(targetPosition, 0);
+
+    addRequirements(system);
+  }
+
+  @Override
+  public void initialize() {
+    pidController.reset();
+
+    // configure our current position, velocity
+    profileSetPoint = new TrapezoidProfile.State(system.getPosition(), system.getVelocity());
+  }
+
+  @Override
+  public void execute() {
+    // as the profile for the next set point, specifying that 20ms have passed.
+    // profileSetPoint should be the last set point we were at, and profileGoal is where we want to go
+    profileSetPoint = profile.calculate(0.02, profileSetPoint, profileGoal);
+
+    double pidOut = pidController.calculate(system.getPosition(), profileSetPoint.position);
+    double ffOut = ffController.calculateWithVelocities(system.getVelocity(), profileSetPoint.velocity);
+    system.set(pidOut + ffOut);
+  }
+
+  @Override
+  public void end(boolean interrupted) {
+    system.stop();
+  }
+
+  @Override
+  public boolean isFinished() {
+    // here we need to decide when to stop. We could wait until the profile ends, but it is more consistent to just
+    // check if we are where we want to be.
+    double currentPosition = system.getPosition();
+    double currentVelocity = system.getVelocity();
+    return Math.abs(profileGoal.position - currentPosition) < POSITION_MARGIN && Math.abs(profileGoal.velocity - currentVelocity) < VELOCITY_MARGIN;
+  }
+}
+```
 
 ### Using in-built Controller Capabilities
 
