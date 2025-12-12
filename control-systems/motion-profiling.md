@@ -364,6 +364,118 @@ class TestCommand extends Command {
 
 ### Using in-built Controller Capabilities
 
+Both **CTRE** and **REV** motor controllers now come with built-in motion profiling capabilities. This can be found in controllers like _TalonFX_, _SparkMax_ and _SparkFlex_. This feature can be used with ease instead of using the _WPI_ implementation.
+
 #### CTRE
+
+**CTRE** provides their _MotionMagic_ control mode for motion profiling. Most of the changes need to be made in the subsystem to configure the motor appropriately and allow use of this control mode.
+
+```java
+class TestSystem extends SubsystemBase {
+
+  private static final int MOTOR_ID = ...;
+  private static final double GEAR_RATIO = ...;
+  private static final double KP = ...;
+  private static final double KI = ...;
+  private static final double KD = ...;
+  private static final double KS = ...;
+  private static final double KV = ...;
+  private static final double KA = ...;
+  private static final double PROFILE_MAX_VELOCITY = ...;
+  private static final double PROFILE_MAX_ACCELERATION = ...;
+  private static final double MOTOR_ROTATIONS_TO_POSITION = ...;
+  private static final double POSITION_MARGIN = ...;
+  private static final double VELOCITY_MARGIN = ...;
+
+  private final TalonFX motor;
+
+  private final StatusSignal<Angle> positionSignal;
+  private final StatusSignal<AngularVelocity> velocitySignal;
+
+  private final MotionMagicDutyCycle motorMagicOut = new MotionMagicDutyCycle(0);
+  private final NeutralOut motorNeutral = new NeutralOut();
+
+  public TestSystem() {
+    motor = new TalonFX(MOTOR_ID);
+
+    // we need to configure PID, FF and MotionMagic.
+    // remember that we need to use the encoder measurement units.
+    TalonFXConfiguration talonConfiguration = new TalonFXConfiguration();
+    talonConfiguration.Feedback.SensorToMechanismRatio = GEAR_RATIO;
+    talonConfiguration.Slot0.kP = KP;
+    talonConfiguration.Slot0.kI = KI;
+    talonConfiguration.Slot0.kD = KD;
+    talonConfiguration.Slot0.kS = KS;
+    talonConfiguration.Slot0.kV = KV;
+    talonConfiguration.Slot0.kA = KA;
+    talonConfiguration.MotionMagic.MotionMagicCruiseVelocity = PROFILE_MAX_VELOCITY / MOTOR_ROTATIONS_TO_POSITION;
+    talonConfiguration.MotionMagic.MotionMagicAcceleration = PROFILE_MAX_ACCELERATION / MOTOR_ROTATIONS_TO_POSITION;
+    motor.getConfigurator().apply(talonConfiguration);
+
+    positionSignal = motor.getPosition();
+    velocitySignal = motor.getVelocity();
+  }
+
+  public double getPosition() {
+    return positionSignal.getValue().in(Units.Rotations) * MOTOR_ROTATIONS_TO_POSITION;
+  }
+
+  public double getVelocity() {
+    return velocitySignal.getValue().in(Units.RotationsPerSecond) * MOTOR_ROTATIONS_TO_POSITION;
+  }
+
+  public boolean isAtTarget(double targetPosition, double targetVelocity) {
+    return Math.abs(targetPosition - getPosition()) < POSITION_MARGIN && Math.abs(targetVelocity - getVelocity()) < VELOCITY_MARGIN;
+  }
+
+  public void setPosition(double targetPosition) {
+      // run motion magic, only needs to be done once, initialize
+      motorMagicOut.Position = targetPosition / MOTOR_ROTATIONS_TO_POSITION;
+      motorMagicOut.Slot = 0;
+      motor.setControl(motorMagicOut);
+  }
+
+  public void stop() {
+    motor.setControl(motorNeutral);
+  }
+
+  @Override
+  public void periodic() {
+    BaseStatusSignal.refreshAll(positionSignal, velocitySignal);
+  }
+}
+
+class TestCommand extends Command {
+
+  private final TestSystem system;
+  private final double targetPosition;
+
+  public TestCommand(TestSystem system, double targetPosition) {
+    this.system = system;
+    this.targetPosition = targetPosition;
+
+    addRequirements(system);
+  }
+
+
+  @Override
+  public void initialize() {
+    system.setPosition(targetPosition);
+  }
+
+  @Override
+  public void execute() {}
+
+  @Override
+  public void end(boolean interrupted) {
+    system.stop();
+  }
+
+  @Override
+  public boolean isFinished() {
+    return system.isAtTarget(targetPosition, 0);
+  }
+}
+```
 
 #### REV
