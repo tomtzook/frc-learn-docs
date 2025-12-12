@@ -133,9 +133,9 @@ $$ X = X_{e1} + V_{max} * t - 0.5 * A * t^2 $$
 With this in hand, we can feed timestamps into the functions to provide which position and velocity we should follow for the profile. A pseudo code, can look like this
 
 ```
-// Get the wanted end position, maximum velocity and maximum acceleration for the profile.
-// Get the timestamp for which to return the position and velocity of the profile.
-calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
+// Provide the wanted maximum velocity, maximum acceleration for the profile and the timestamp.
+// Get the position and velocity of the profile at that timestamp.
+calcProfile(maxVelocity, maxAcceleration, currentTime):
   accelerationTime = maxVelocity / maxAcceleration // the time needed to reach max velocity (T)
   if currentTime <= accelerationTime:
     // we are at phase 1
@@ -148,6 +148,30 @@ calcProfile(distance, maxVelocity, maxAcceleration, currentTime):
     position = x0 + maxVelocity * currentTime - 0.5 * maxAcceleration * currentTime * currentTime
     velocity = maxVelocity - maxAcceleration * decelCurrentTime
 ```
+
+You might have noticed that we haven't really addressed the target position here. And this is true, we haven't addressed how far we want to go, so we may just miss it, or not get there at all. One one end, maybe the distance is too short to reach $V_{max}$ with the given acceleration $A$. On the other end, maybe the distance is too long to complete it in our triangle with the given acceleration and velocity, and we need some extra motion.
+
+We can declare the distance passed $D$ as the sum of distances passed in each phase, while these distances will be calculated as
+
+$$ D_1 = 0.5 * A * T^2 $$
+
+$$ D_2 = V_{max} * T - 0.5 * A * T^2 $$ 
+
+$$ D = D_1 + D_2 $$
+
+$$ D = (0.5 * A * T^2) + (V_{max} * T) - (0.5 * A * T^2) $$
+
+$$ D = V_{max} * T $$
+
+So we have a way to tell how much distance our profile will pass. Recall that $T = \frac{V_{max}}{A}$, so
+
+$$ D = V_{max} * \frac{V_{max}}{A} $$
+
+$$ D = \frac{2 * V_{max}}{A} $$
+
+So given a known acceleration and wanted distance to pass, we can decide what our $V_{max}$ will be
+
+$$ V_{max} = \frac{D * A}{2} $$
 
 #### Trapezoid Profile
 
