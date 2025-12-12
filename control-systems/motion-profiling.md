@@ -106,9 +106,13 @@ Let's declare the acceleration used as $A$, the maximum velocity as $V_{max}$ an
 
 For phase 1 (_acceleration_) we start with $V_0 = 0, X_0 = 0$. We can describe each position and velocity in the phase as a function of time:
 
-$$ V = V_0 + a * t = A * t $$
+$$ V = V_0 + a * t $$
 
-$$ X = X_0 + V_0 * t + 0.5 * a * t^2 = 0.5 * A * t^2 $$
+$$ V = A * t $$
+
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 $$
+
+$$ X = 0.5 * A * t^2 $$
 
 We describe the time it takes for this phase with
 
@@ -118,9 +122,13 @@ Since both phases use the same acceleration value, we can say that they both tak
 
 For phase 2 (_deceleration_) we start with $V_0 = V_{max}, X_0 = X_{e1}$ where $X_{e1}$ is the position we ended phase 1 with. We can agin describe each position and velocity as a function of time, with our start time for the phase being $0$:
  
-$$ V = V_0 + a * t = V_{max} - A * t $$
+$$ V = V_0 + a * t $$
 
-$$ X = X_0 + V_0 * t + 0.5 * a * t^2 = X_{e1} + V_{max} * t - 0.5 * A * t^2 $$
+$$ V = V_{max} - A * t $$
+
+$$ X = X_0 + V_0 * t + 0.5 * a * t^2 $$
+
+$$ X = X_{e1} + V_{max} * t - 0.5 * A * t^2 $$
 
 With this in hand, we can feed timestamps into the functions to provide which position and velocity we should follow for the profile. A pseudo code, can look like this
 
