@@ -29,7 +29,7 @@ $$ y = y_0 + V_0 \sin(\alpha) t - \frac{1}{2} g t^2 $$
 In order to score a goal, the item must reach the goal's entry position with $x$ and $y$ at the same time.
 **DRAWING OF THIS**
 
-With the height of the goal entry being $H$, our shooter height $h$ and the horizontal distance from our shooter to the goal as $d$:
+With the height of the goal entry being $H$, our shooter height $h$ and the horizontal distance from our shooter to the goal as $d = x - x_0$:
 
 $$ d = V_0 \cos(\alpha) t $$
 $$ H = h + V_0 \sin(\alpha) t - \frac{1}{2} g t^2 $$
